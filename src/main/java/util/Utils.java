@@ -4,26 +4,36 @@ import org.apache.maven.shared.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 import static util.Constants.*;
 import static java.util.stream.Collectors.*;
 
 public class Utils {
+    public static Map<String, List<String>> splitQueryList(String query) {
+        if (!StringUtils.isNotBlank(query)) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<String>> collect = Pattern.compile(URI_PARAM_SEPARATOR)
+                .splitAsStream(query)
+                .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
+                .collect(groupingBy(s -> decode(s[0]),
+                        mapping(s -> decode(s[1]), toList())));
 
-    public static Map<String, List<String>> splitQuery(String query) {
+        return collect;
+
+    }
+
+    public static Map<String, String> splitQuery(String query) {
         if (!StringUtils.isNotBlank(query)) {
             return Collections.emptyMap();
         }
         return Pattern.compile(URI_PARAM_SEPARATOR).splitAsStream(query)
                 .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
-                .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
-
+                .collect(Collectors.toMap(p -> p[0], p -> p[1]));
     }
 
     private static String decode(final String encoded) {

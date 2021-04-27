@@ -1,98 +1,78 @@
-import auth.RegistrationHandler;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import com.sun.net.httpserver.BasicAuthenticator;
-import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
+import handler.ProductHandler;
+import handler.RegistrationHandler;
 import org.apache.http.client.methods.HttpPost;
-import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import service.ProductService;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
 
-import static org.apache.http.HttpStatus.SC_METHOD_NOT_ALLOWED;
-import static org.apache.http.HttpStatus.SC_OK;
+import static api.StatusCode.FORBIDDEN;
+import static api.StatusCode.OK;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static util.Constants.*;
-import static util.Utils.splitQuery;
+
 
 public class Application {
 
+    private static MongoDatabase database;
+
     public static void main(String[] args) throws IOException {
         configMongo();
-        configAPI();
     }
 
-    private static void configMongo() {
+    private static void configMongo() throws IOException {
 
-        MongoClient mongoClient = new MongoClient(MONGO_HOST, MONGO_PORT);
-        MongoDatabase database = mongoClient.getDatabase(DATABASE);
-        MongoCollection<Document> usersCollection = database.getCollection(USERS_COLLECTION);
-        MongoCollection<Document> ordersCollection = database.getCollection(ORDERS_COLLECTION);
-        MongoCollection<Document> booksCollection = database.getCollection(BOOKS_COLLECTION);
-        MongoCollection<Document> gamesCollection = database.getCollection(GAMES_COLLECTION);
+        ConnectionString connectionString = new ConnectionString("mongodb://localhost");
+        CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
+        CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
+
+        MongoClientSettings clientSettings = MongoClientSettings.builder()
+                .applyConnectionString(connectionString)
+                .codecRegistry(codecRegistry)
+                .build();
+
+        try (MongoClient mongoClient = MongoClients.create(clientSettings)) {
+            database = mongoClient.getDatabase(DATABASE);
+            configAPI();
+        }
     }
 
     private static void configAPI() throws IOException {
-
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT),0);
 
-        RegistrationHandler registrationHandler = new RegistrationHandler(Configuration.getUserService(),
-                Configuration.getObjectMapper(), Configuration.getExceptionHandler());
-
+        RegistrationHandler registrationHandler = new RegistrationHandler(
+                Configuration.getUserService(),
+                Configuration.getObjectMapper(),
+                Configuration.getExceptionHandler());
         server.createContext("/api/users/register", registrationHandler::handle);
 
-        server.createContext("api/products/books/", (exchange -> {})).setAuthenticator(new BasicAuthenticator(MONGO_REALM) {
-            @Override
-            public boolean checkCredentials(String username, String password) {
-                return true;
-            }
-        });
+        ProductHandler productHandler = new ProductHandler(
+                Configuration.getObjectMapper(),
+                Configuration.getExceptionHandler(),
+                new ProductService(database.getCollection(BOOKS_COLLECTION)));
+        server.createContext("/api/products", productHandler::handle);
 
-        server.createContext("api/products/games", (exchange -> {})).setAuthenticator(new BasicAuthenticator(MONGO_REALM) {
-            @Override
-            public boolean checkCredentials(String username, String password) {
-                return true;
-            }
-        });
-
-        server.createContext("api/orders", (exchange -> {})).setAuthenticator(new BasicAuthenticator(MONGO_REALM) {
-            @Override
-            public boolean checkCredentials(String username, String password) {
-                return true;
-            }
-        });
-
-        HttpContext context = server.createContext("/api/hello", (exchange -> {
+        server.createContext("/api/hello", (exchange -> {
             if (HttpPost.METHOD_NAME.equals(exchange.getRequestMethod())) {
-                Map<String, List<String>> params = splitQuery(exchange.getRequestURI().getRawQuery());
-                String noName = "anon";
-                String name = params.getOrDefault("name", List.of(noName)).stream().findFirst().orElse(noName);
-                String response = String.format("Hello %s", name);
-
-                exchange.sendResponseHeaders(SC_OK,  response.getBytes().length);
-
+                exchange.sendResponseHeaders(OK.getCode(),  "Hello".getBytes().length);
                 OutputStream output = exchange.getResponseBody();
-                output.write(response.getBytes());
+                output.write("Hello".getBytes());
                 output.flush();
             } else {
-                exchange.sendResponseHeaders(SC_METHOD_NOT_ALLOWED, -1);
+                exchange.sendResponseHeaders(FORBIDDEN.getCode(), -1);
             }
-
             exchange.close();
         }));
-
-
-        context.setAuthenticator(new BasicAuthenticator(MONGO_REALM) {
-            @Override
-            public boolean checkCredentials(String username, String password) {
-                return true;
-            }
-        });
-
         server.setExecutor(null);
         server.start();
     }

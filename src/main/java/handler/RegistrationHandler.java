@@ -1,8 +1,10 @@
-package auth;
+package handler;
 
 import api.Handler;
 import api.StatusCode;
 import api.Response;
+import auth.RegistrationRequest;
+import auth.RegistrationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import model.NewUser;
@@ -58,9 +60,7 @@ public class RegistrationHandler extends Handler {
                 .build();
 
         String newUserId = userService.create(user);
-
         RegistrationResponse response = new RegistrationResponse(newUserId);
-
         return new Response<>(response, getHeaders(CONTENT_TYPE, APPLICATION_JSON), StatusCode.CREATED);
     }
 }

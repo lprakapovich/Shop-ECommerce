@@ -9,9 +9,10 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static Constants.APPLICATION_JSON;
-import static Constants.CONTENT_TYPE;
+
 import static api.StatusCode.*;
+import static util.Constants.APPLICATION_JSON;
+import static util.Constants.CONTENT_TYPE;
 
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
