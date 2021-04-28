@@ -1,24 +1,21 @@
 package model.product;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
-
-/**
- * Base class with all the general information about the product
- */
+import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.ObjectId;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Product {
-    protected String id;
-    protected String sku;
-    protected String slug;
-    protected String name;
-    protected String description;
-    protected double price;
-    protected Set<String> categoryIds;
+
+    @BsonProperty("_id")
+    private ObjectId id;
+    private String name;
+    private double price;
+
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
 }

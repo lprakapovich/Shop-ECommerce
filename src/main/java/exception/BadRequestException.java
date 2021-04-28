@@ -1,8 +1,10 @@
 package exception;
 
+import api.StatusCode;
+
 public class BadRequestException extends ApplicationException {
 
-    public BadRequestException(int code, String message) {
-        super(code, message);
+    public BadRequestException(String message) {
+        super(StatusCode.BAD_REQUEST.getCode(), message);
     }
 }

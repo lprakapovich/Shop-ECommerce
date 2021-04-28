@@ -2,15 +2,18 @@ package model.product.book;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import model.product.Product;
 
-import java.util.Date;
-
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Book extends Product {
+
     private String author;
-    private Genre genre;
-    private String isbn;
-    private Date publishDate;
+
+    public Book(String name, double price, String author) {
+        super(name, price);
+        this.author = author;
+    }
 }

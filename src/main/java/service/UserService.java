@@ -1,15 +1,15 @@
 package service;
 
-import model.NewUser;
+import com.mongodb.client.MongoCollection;
 import lombok.AllArgsConstructor;
-import repository.UserRepository;
+import model.user.User;
 
 @AllArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final MongoCollection<User> usersCollection;
 
-    public String create(NewUser user) {
-        return userRepository.create(user);
+    public void create(User user) {
+        usersCollection.insertOne(user);
     }
 }

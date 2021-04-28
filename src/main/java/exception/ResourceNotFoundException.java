@@ -1,8 +1,10 @@
 package exception;
 
+import api.StatusCode;
+
 public class ResourceNotFoundException extends ApplicationException {
 
-    public ResourceNotFoundException(int code, String message) {
-        super(code, message);
+    public ResourceNotFoundException(String message) {
+        super(StatusCode.NOT_FOUND.getCode(), message);
     }
 }

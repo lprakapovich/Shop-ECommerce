@@ -14,6 +14,8 @@ import static api.StatusCode.*;
 import static util.Constants.APPLICATION_JSON;
 import static util.Constants.CONTENT_TYPE;
 
+// TODO: change all the exceptions so that the error code would be set implicitly
+
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 

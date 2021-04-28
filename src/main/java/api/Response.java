@@ -1,10 +1,11 @@
 package api;
 
-import api.StatusCode;
 import com.sun.net.httpserver.Headers;
+import lombok.Builder;
 import lombok.Value;
 
 @Value
+@Builder
 public class Response<T> {
     T body;
     Headers headers;
