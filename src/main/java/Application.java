@@ -5,12 +5,15 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
 import handler.BookHandler;
+import handler.OrderHandler;
 import handler.RegistrationHandler;
+import model.order.Order;
 import model.product.book.Book;
 import model.user.User;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import service.BookService;
+import service.OrderService;
 import service.UserService;
 
 import java.io.IOException;
@@ -58,6 +61,11 @@ public class Application {
                 Configuration.getExceptionHandler(),
                 new BookService(database.getCollection(BOOKS_COLLECTION, Book.class)));
         server.createContext("/api/products/books", productHandler::handle);
+
+        OrderHandler orderHandler = new OrderHandler(
+                Configuration.getObjectMapper(),
+                Configuration.getExceptionHandler(),
+                new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class)));
 
         server.setExecutor(null);
         server.start();

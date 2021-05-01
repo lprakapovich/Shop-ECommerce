@@ -6,7 +6,6 @@ import exception.ResourceNotFoundException;
 import model.product.book.Book;
 import model.product.book.Genre;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
