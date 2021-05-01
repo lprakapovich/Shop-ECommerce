@@ -50,6 +50,7 @@ public class Application {
 
     private static void configAPI() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT),0);
+
         RegistrationHandler registrationHandler = new RegistrationHandler(
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),
@@ -66,7 +67,7 @@ public class Application {
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),
                 new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class)));
-
+        server.createContext("/api/orders", orderHandler::handle);
         server.setExecutor(null);
         server.start();
     }

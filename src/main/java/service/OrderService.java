@@ -13,7 +13,6 @@ public class OrderService {
     }
 
     public String create(Order order) {
-
-        return null;
+        return orderRepository.create(order);
     }
 }

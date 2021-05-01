@@ -3,20 +3,27 @@ package handler;
 import api.Handler;
 import api.Method;
 import api.Response;
+import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
-import model.product.book.Book;
+import model.order.Order;
 import service.OrderService;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 import static api.Message.INVALID_METHOD;
+import static util.Constants.APPLICATION_JSON;
+import static util.Constants.CONTENT_TYPE;
+import static util.Utils.splitQueryList;
 
 public class OrderHandler extends Handler {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     public OrderHandler(ObjectMapper objectMapper, GlobalExceptionHandler exceptionHandler, OrderService orderService) {
         super(objectMapper, exceptionHandler);
@@ -39,7 +46,7 @@ public class OrderHandler extends Handler {
     // 5. get user -> read orderIds -> get all user orders
     // 6. get product -> read orderIds -> get all orders in which the product appeared
 
-    private byte[] resolveResponse(HttpExchange exchange) {
+    private byte[] resolveResponse(HttpExchange exchange) throws IOException {
         byte[] response;
 
         Method method = Method.valueOf(exchange.getRequestMethod());
@@ -50,7 +57,7 @@ public class OrderHandler extends Handler {
                 break;
 
             case GET:
-                Response<Book> get = handleGet(exchange);
+                Response<Order> get = handleGet(exchange);
                 response = getResponseBodyAsBytes(exchange, get);
                 break;
 
@@ -70,15 +77,25 @@ public class OrderHandler extends Handler {
         return null;
     }
 
-    private Response<Book> handleGet(HttpExchange exchange) {
+    // TODO change all gets so that product id is sent as path variable (not parameter)
+    private Response<Order> handleGet(HttpExchange exchange) {
+        Map<String, List<String>> params = splitQueryList(exchange.getRequestURI().getRawQuery());
+        System.out.println(params);
         return null;
     }
 
-    private byte[] getResponseBodyAsBytes(HttpExchange exchange, Response<?> post) {
-        return null;
+    private byte[] getResponseBodyAsBytes(HttpExchange exchange, Response<?> response) throws IOException {
+        exchange.getResponseHeaders().putAll(response.getHeaders());
+        exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
+        return super.writeResponse(response.getBody());
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
-        return null;
+        String orderId = orderService.create(readRequestBody(exchange.getRequestBody(), Order.class));
+        return Response.<String>builder()
+                .body(orderId)
+                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .status(StatusCode.CREATED)
+                .build();
     }
 }
