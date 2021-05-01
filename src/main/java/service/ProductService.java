@@ -1,11 +1,15 @@
 package service;
 
 import com.mongodb.client.MongoCollection;
+import exception.BadRequestException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
 import repository.ProductRepository;
 
 import java.util.List;
+
+import static api.Message.INVALID_PRODUCT;
+import static api.Message.ITEM_NOT_FOUND;
 
 public class ProductService <T extends Product> {
 
@@ -16,10 +20,8 @@ public class ProductService <T extends Product> {
     }
 
     public String create(T t) {
+        validateProduct(t);
         return productRepository.create(t);
-    }
-
-    private void validateProduct() {
     }
 
     public T get(String bookId) {
@@ -27,6 +29,17 @@ public class ProductService <T extends Product> {
     }
 
     public void delete(String id) {
+        if (productRepository.delete(id) == null) {
+            throw new BadRequestException(ITEM_NOT_FOUND);
+        }
+    }
+
+    public T update(T t) {
+        T updated = productRepository.update(t);
+        if (updated == null) {
+            throw new BadRequestException(ITEM_NOT_FOUND);
+        }
+        return updated;
     }
 
     public List<T> findByPriceInRange(double max, double min) {
@@ -51,5 +64,11 @@ public class ProductService <T extends Product> {
             throw new ResourceNotFoundException("Products in a given price range could not be found");
         }
         return products;
+    }
+
+    private void validateProduct(T t) {
+        if (t.getQuantity() <= 0 || t.getPrice() <= 0) {
+            throw new BadRequestException(INVALID_PRODUCT);
+        }
     }
 }

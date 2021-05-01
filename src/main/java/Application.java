@@ -57,8 +57,8 @@ public class Application {
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),
                 new BookService(database.getCollection(BOOKS_COLLECTION, Book.class)));
-
         server.createContext("/api/products/books", productHandler::handle);
+
         server.setExecutor(null);
         server.start();
     }

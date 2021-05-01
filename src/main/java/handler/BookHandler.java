@@ -42,7 +42,7 @@ public class BookHandler extends Handler {
     }
 
     private byte[] handleBookRequests(HttpExchange exchange, Map<String, String> params) throws IOException {
-        byte[] response = null;
+        byte[] response;
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch (method) {
             case GET:
@@ -53,6 +53,10 @@ public class BookHandler extends Handler {
                 Response<String> post = handlePost(exchange);
                 response = getResponseBodyAsBytes(post, exchange);
                 break;
+            case PUT:
+                Response<Book> put = handlePut(exchange);
+                response = getResponseBodyAsBytes(put, exchange);
+                break;
             case DELETE:
                 Response<Object> delete = handleDelete(params);
                 response = getResponseBodyAsBytes(delete, exchange);
@@ -60,6 +64,7 @@ public class BookHandler extends Handler {
             default:
                 throw new BadRequestException("Couldn't resolve a HTTP method");
         }
+
         return response;
     }
 
@@ -85,6 +90,15 @@ public class BookHandler extends Handler {
                 .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
                 .status(StatusCode.CREATED)
                 .body(newId)
+                .build();
+    }
+
+    private Response<Book> handlePut(HttpExchange exchange) {
+        Book updated = bookService.update(readRequestBody(exchange.getRequestBody(), Book.class));
+        return Response.<Book>builder()
+                .body(updated)
+                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .status(StatusCode.OK)
                 .build();
     }
 

@@ -6,5 +6,5 @@ public class Message {
 
     public static final String ITEM_NOT_FOUND = "Item not found";
     public static final String NON_UNIQUE_RESULT = "Query returned non-unique result";
-
+    public static final String INVALID_PRODUCT = "Product data is invalid";
 }

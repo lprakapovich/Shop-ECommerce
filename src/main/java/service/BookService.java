@@ -22,7 +22,6 @@ public class BookService extends ProductService<Book> {
         return super.create(book);
     }
 
-    // TODO check whether a book with the same name and author exists
     private void validateBook(Book book) {
         Map<String, String> params = Stream.of(new String[][] {
                 { "name", book.getName() },

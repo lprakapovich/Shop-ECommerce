@@ -1,21 +1,23 @@
 package model.product;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bson.types.ObjectId;
+import model.DBObject;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class Product {
+public class Product extends DBObject {
 
-    @BsonProperty("_id")
-    private ObjectId id;
     private String name;
     private double price;
+    private int quantity;
 
-    public Product(String name, double price) {
+    public Product(String name, double price, int quantity) {
+        super();
         this.name = name;
         this.price = price;
+        this.quantity = quantity;
     }
 }
