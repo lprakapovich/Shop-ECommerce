@@ -8,10 +8,10 @@ public class Constants {
     public static final int SERVER_PORT = 8000;
 
     public static final String DATABASE = "bookstore";
-    public static final String USERS_COLLECTION = "bookstore";
-    public static final String BOOKS_COLLECTION = "users";
-    public static final String GAMES_COLLECTION = "books";
-    public static final String ORDERS_COLLECTION = "games";
+    public static final String USERS_COLLECTION = "users";
+    public static final String BOOKS_COLLECTION = "books";
+    public static final String GAMES_COLLECTION = "games";
+    public static final String ORDERS_COLLECTION = "orders";
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";

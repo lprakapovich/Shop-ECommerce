@@ -1,66 +1,53 @@
 package service;
 
 import com.mongodb.client.MongoCollection;
-import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import model.product.Product;
-import org.bson.types.ObjectId;
+import repository.ProductRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.*;
+public class ProductService <T extends Product> {
 
-@RequiredArgsConstructor
-public class ProductService {
+    private final ProductRepository<T> productRepository;
 
-    protected final MongoCollection<Product> collection;
-
-    public ObjectId create(Product product) {
-        collection.insertOne(product);
-
-        System.out.println("Inserted object id: " + product.getId().toString());
-        return product.getId();
+    public ProductService(MongoCollection<T> collection) {
+        this.productRepository = new ProductRepository<>(collection);
     }
 
-    public Product getProductById(String id) {
+    public String create(T t) {
+        return null;
+    }
 
-        List<Product> products = collection.find(eq("_id", new ObjectId(id))).into(new ArrayList<>());
+    public T get(String bookId) {
 
-        if (products.isEmpty()) {
-            throw new ResourceNotFoundException("Product not found");
-        } else if (products.size() > 1) {
-            throw new NonUniqueQueryResultException("More than one product matching this id found");
-        }
-        return products.get(0);
+        return null;
     }
 
     public void delete(String id) {
-        Product deletedProduct = collection.findOneAndDelete(eq("_id", new ObjectId(id)));
-        if (deletedProduct == null) {
-            throw new ResourceNotFoundException("Product could not be found");
-        }
     }
 
-    public List<Product> findByPriceInRange(double max, double min) {
-        List<Product> products = collection.find(and(gte("price", min), lte("price", max))).into(new ArrayList<>());
+    public List<T> findByPriceInRange(double max, double min) {
+        List<T> products = productRepository.findByPriceRange(max, min);
         if (products.isEmpty()) {
             throw new ResourceNotFoundException("Products in a given price range could not be found");
         }
         return products;
     }
 
-    public List<Product> findByPriceHigherThan(double min) {
-        List<Product> products = collection.find((gte("price", min))).into(new ArrayList<>());
+    public List<T> findByPriceHigherThan(double min) {
+        List<T> products = productRepository.findByPriceHigherThan(min);
         if (products.isEmpty()) {
             throw new ResourceNotFoundException("Products in a given price range could not be found");
         }
         return products;
     }
 
-    public List<Product> findByPriceLowerThan(double max) {
-
-        return null;
+    public List<T> findByPriceLowerThan(double max) {
+        List<T> products = productRepository.findByPriceLowerThan(max);
+        if (products.isEmpty()) {
+            throw new ResourceNotFoundException("Products in a given price range could not be found");
+        }
+        return products;
     }
 }

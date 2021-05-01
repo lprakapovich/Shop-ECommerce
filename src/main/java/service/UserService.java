@@ -1,15 +1,26 @@
 package service;
 
 import com.mongodb.client.MongoCollection;
-import lombok.AllArgsConstructor;
+import exception.BadRequestException;
 import model.user.User;
+import repository.UserRepository;
 
-@AllArgsConstructor
 public class UserService {
 
-    private final MongoCollection<User> usersCollection;
+    private final UserRepository userRepository;
 
-    public void create(User user) {
-        usersCollection.insertOne(user);
+    public UserService(MongoCollection<User> collection) {
+        userRepository = new UserRepository(collection);
+    }
+
+    public String create(User user) {
+        validateUser(user);
+        return userRepository.create(user);
+    }
+
+    private void validateUser(User user) {
+        if (userRepository.existsByFieldValue("email", user.getEmail())) {
+            throw new BadRequestException("User with such an email already exists");
+        }
     }
 }

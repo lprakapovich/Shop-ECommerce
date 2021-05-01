@@ -9,9 +9,6 @@ import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.product.book.Book;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpStatus;
-import org.bson.types.ObjectId;
 import service.BookService;
 
 import java.io.IOException;
@@ -53,7 +50,7 @@ public class BookHandler extends Handler {
                 response = getResponseBodyAsBytes(get, exchange);
                 break;
             case POST:
-                Response<ObjectId> post = handlePost(exchange);
+                Response<String> post = handlePost(exchange);
                 response = getResponseBodyAsBytes(post, exchange);
                 break;
             case DELETE:
@@ -74,22 +71,29 @@ public class BookHandler extends Handler {
 
     private Response<Book> handleGet(Map<String, String> params) {
         String bookId = params.get(PRODUCT_ID.getName());
-        Book book = (Book) bookService.getProductById(bookId);
-        return Response.<Book>builder().body(book)
-                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON)).status(StatusCode.OK).build();
+        return Response.<Book>builder()
+                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .body(bookService.get(bookId))
+                .status(StatusCode.OK)
+                .build();
     }
 
-    private Response<ObjectId> handlePost(HttpExchange exchange) {
+    private Response<String> handlePost(HttpExchange exchange) {
         Book book = readRequestBody(exchange.getRequestBody(), Book.class);
-        ObjectId newId = bookService.create(book);
-        return Response.<ObjectId>builder().body(newId)
-                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON)).status(StatusCode.CREATED).build();
+        String newId = bookService.create(book);
+        return Response.<String>builder()
+                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .status(StatusCode.CREATED)
+                .body(newId)
+                .build();
     }
 
     private Response<Object> handleDelete(Map<String, String> params) {
         String id = params.get(PRODUCT_ID.getName());
         bookService.delete(id);
-        return Response.builder().status(StatusCode.NO_CONTENT).build();
+        return Response.builder()
+                .status(StatusCode.NO_CONTENT)
+                .build();
     }
 }
 
