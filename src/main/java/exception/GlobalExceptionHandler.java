@@ -14,8 +14,6 @@ import static api.StatusCode.*;
 import static util.Constants.APPLICATION_JSON;
 import static util.Constants.CONTENT_TYPE;
 
-// TODO: change all the exceptions so that the error code would be set implicitly
-
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
@@ -23,8 +21,8 @@ public class GlobalExceptionHandler {
 
     public void handle(Throwable throwable, HttpExchange exchange) {
         try {
-            throwable.printStackTrace();
-            exchange.getRequestHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
+            //throwable.printStackTrace();
+            exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
             ErrorResponse errorResponse = getErrorResponse(throwable, exchange);
             OutputStream responseBody = exchange.getResponseBody();
             responseBody.write(objectMapper.writeValueAsBytes(errorResponse));

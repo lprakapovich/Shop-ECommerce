@@ -9,19 +9,21 @@ import java.util.List;
 
 public class ProductService <T extends Product> {
 
-    private final ProductRepository<T> productRepository;
+    protected final ProductRepository<T> productRepository;
 
     public ProductService(MongoCollection<T> collection) {
         this.productRepository = new ProductRepository<>(collection);
     }
 
     public String create(T t) {
-        return null;
+        return productRepository.create(t);
+    }
+
+    private void validateProduct() {
     }
 
     public T get(String bookId) {
-
-        return null;
+        return productRepository.get(bookId);
     }
 
     public void delete(String id) {

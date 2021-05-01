@@ -6,19 +6,16 @@ import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
 import handler.BookHandler;
 import handler.RegistrationHandler;
-import model.product.Product;
 import model.product.book.Book;
 import model.user.User;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.types.ObjectId;
 import service.BookService;
 import service.UserService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import static com.mongodb.client.model.Filters.eq;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static util.Constants.*;
@@ -46,14 +43,10 @@ public class Application {
         MongoClient mongoClient = MongoClients.create(clientSettings);
         database = mongoClient.getDatabase(DATABASE);
         configAPI();
-
-        Book b = database.getCollection(BOOKS_COLLECTION, Book.class).find(eq("_id", new ObjectId("6089cb034e1f0415394d582f"))).first();
-
     }
 
     private static void configAPI() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT),0);
-
         RegistrationHandler registrationHandler = new RegistrationHandler(
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),

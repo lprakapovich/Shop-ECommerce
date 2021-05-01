@@ -4,10 +4,12 @@ import com.mongodb.client.MongoCollection;
 import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static api.Message.ITEM_NOT_FOUND;
 import static api.Message.NON_UNIQUE_RESULT;
@@ -45,5 +47,13 @@ public class MongoRepository<T> {
 
     public boolean existsByFieldValue(String field, String value) {
         return collection.find(eq(field, value)).first() != null;
+    }
+
+    public boolean existsByFieldValues(Map<String, String> queryParams) {
+        Document query = new Document();
+        for (String key: queryParams.keySet()) {
+            query.append(key, queryParams.get(key));
+        }
+        return collection.find(query).first() != null;
     }
 }
