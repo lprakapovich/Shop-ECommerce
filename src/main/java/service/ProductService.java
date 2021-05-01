@@ -6,10 +6,10 @@ import exception.ResourceNotFoundException;
 import model.product.Product;
 import repository.ProductRepository;
 
+import java.util.HashMap;
 import java.util.List;
 
-import static api.Message.INVALID_PRODUCT;
-import static api.Message.ITEM_NOT_FOUND;
+import static api.Message.*;
 
 public class ProductService <T extends Product> {
 
@@ -40,6 +40,14 @@ public class ProductService <T extends Product> {
             throw new BadRequestException(ITEM_NOT_FOUND);
         }
         return updated;
+    }
+
+    public List<T> findByCriteria(HashMap<String, String> criteria) {
+        List<T> products = productRepository.findByFieldValues(criteria);
+        if (products.isEmpty()) {
+            throw new ResourceNotFoundException(PRODUCTS_CRITERIA_NOT_FOUND);
+        }
+        return products;
     }
 
     public List<T> findByPriceInRange(double max, double min) {

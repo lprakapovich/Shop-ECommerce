@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static api.Message.ITEM_NOT_FOUND;
-import static api.Message.NON_UNIQUE_RESULT;
+import static api.Message.*;
 import static com.mongodb.client.model.Filters.eq;
 
 @AllArgsConstructor
@@ -44,15 +43,29 @@ public class MongoRepository<T extends DBObject> {
         return collection.findOneAndReplace(eq("_id", t.getId()), t);
     }
 
+    public List<T> findByFieldValue(String field, Object value) {
+        return collection.find(eq(field, value)).into(new ArrayList<>());
+    }
+
+    public List<T> findByFieldValues(Map<String, String> queryParams) {
+        ArrayList<T> items = collection.find(generateQuery(queryParams)).into(new ArrayList<>());
+        if (items.isEmpty()) {
+            throw new ResourceNotFoundException(QUERY_NO_RESULT);
+        }
+        return items;
+    }
+
     public boolean existsByFieldValue(String field, String value) {
         return collection.find(eq(field, value)).first() != null;
     }
 
     public boolean existsByFieldValues(Map<String, String> queryParams) {
+        return collection.find(generateQuery(queryParams)).first() != null;
+    }
+
+    private Document generateQuery(Map<String, String> queryParams) {
         Document query = new Document();
-        for (String key: queryParams.keySet()) {
-            query.append(key, queryParams.get(key));
-        }
-        return collection.find(query).first() != null;
+        queryParams.keySet().forEach(key -> query.append(key, queryParams.get(key)));
+        return query;
     }
 }
