@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     public void handle(Throwable throwable, HttpExchange exchange) {
         try {
-            //throwable.printStackTrace();
+            throwable.printStackTrace();
             exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
             ErrorResponse errorResponse = getErrorResponse(throwable, exchange);
             OutputStream responseBody = exchange.getResponseBody();

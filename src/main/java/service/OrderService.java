@@ -1,7 +1,7 @@
 package service;
 
 import com.mongodb.client.MongoCollection;
-import exception.UserNameMismatch;
+import exception.BadRequestException;
 import model.order.Order;
 import repository.OrderRepository;
 
@@ -21,8 +21,8 @@ public class OrderService {
     }
 
     private void validateOrder(Order order, String authenticatedUserEmail) {
-        if (order.getIssuer().getEmail().equals(authenticatedUserEmail)) {
-            throw new UserNameMismatch(USERNAME_MISMATCH);
+        if (!order.getIssuer().getEmail().equals(authenticatedUserEmail)) {
+            throw new BadRequestException(USERNAME_MISMATCH);
         }
     }
 }
