@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -8,6 +9,8 @@ import handler.BookHandler;
 import handler.OrderHandler;
 import handler.RegistrationHandler;
 import model.order.Order;
+import model.order.OrderedItem;
+import model.product.Product;
 import model.product.book.Book;
 import model.user.User;
 import org.bson.codecs.configuration.CodecRegistry;

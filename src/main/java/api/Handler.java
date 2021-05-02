@@ -39,6 +39,8 @@ public abstract class Handler {
     protected <T> byte[] writeResponse(T response) {
         byte[] responseBytes;
         try {
+            String s = objectMapper.writeValueAsString(response);
+            System.out.println(s);
             responseBytes = objectMapper.writeValueAsBytes(response);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
