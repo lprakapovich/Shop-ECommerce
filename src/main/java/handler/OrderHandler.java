@@ -1,18 +1,17 @@
 package handler;
 
-import api.Handler;
-import api.Method;
-import api.Response;
-import api.StatusCode;
+import api.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.order.Order;
+import org.bson.internal.Base64;
 import service.OrderService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +90,9 @@ public class OrderHandler extends Handler {
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
-        String orderId = orderService.create(readRequestBody(exchange.getRequestBody(), Order.class));
+
+        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+        String orderId = orderService.create(readRequestBody(exchange.getRequestBody(), Order.class), user);
         return Response.<String>builder()
                 .body(orderId)
                 .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))

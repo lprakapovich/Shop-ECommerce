@@ -19,6 +19,7 @@ public class Constants {
 
     public static final String EQUALS = "=";
     public static final String URI_PARAM_SEPARATOR = "&";
+    public static final String HEADER_SEPARATOR = ":";
 
     public static final int PARAM_ARRAY_SIZE = 2;
 }
