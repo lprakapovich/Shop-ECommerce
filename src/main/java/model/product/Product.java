@@ -9,15 +9,11 @@ import model.DBObject;
 import model.product.book.Book;
 import model.product.game.BoardGame;
 
-import static com.fasterxml.jackson.annotation.JsonSubTypes.*;
+import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-
-// TODO temporary solution to polymorphic deserialization,
-//  enforce front to send additional type info with json
-
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @Type(value = Book.class, name = "book"),

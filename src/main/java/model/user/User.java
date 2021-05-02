@@ -4,6 +4,8 @@ import lombok.*;
 import model.DBObject;
 import model.order.Address;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -16,4 +18,5 @@ public class User extends DBObject {
     private String password;
     private Address address;
     private Role role;
+    private List<String> orderIds;
 }

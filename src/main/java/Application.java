@@ -38,6 +38,8 @@ public class Application {
     private static void configMongo() throws IOException {
 
         ConnectionString connectionString = new ConnectionString("mongodb://localhost");
+
+        // direct serialization of POJOs to and from BSON
         CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
 
@@ -54,10 +56,12 @@ public class Application {
     private static void configAPI() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT),0);
 
+        UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
+
         RegistrationHandler registrationHandler = new RegistrationHandler(
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),
-                new UserService(database.getCollection(USERS_COLLECTION, User.class)));
+                userService);
         server.createContext("/api/users/register", registrationHandler::handle);
 
         BookHandler productHandler = new BookHandler(
@@ -69,7 +73,7 @@ public class Application {
         OrderHandler orderHandler = new OrderHandler(
                 Configuration.getObjectMapper(),
                 Configuration.getExceptionHandler(),
-                new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class)));
+                new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService));
         server.createContext("/api/orders", orderHandler::handle);
         server.setExecutor(null);
         server.start();

@@ -6,18 +6,16 @@ import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.order.Order;
-import org.bson.internal.Base64;
+import org.apache.maven.shared.utils.StringUtils;
 import service.OrderService;
+import util.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
 import static api.Message.INVALID_METHOD;
-import static util.Constants.APPLICATION_JSON;
-import static util.Constants.CONTENT_TYPE;
 import static util.Utils.splitQueryList;
 
 public class OrderHandler extends Handler {
@@ -38,7 +36,7 @@ public class OrderHandler extends Handler {
     }
 
     //TODO
-    // 1. create order POST
+    // 1. create order POST - d
     // 2. delete order DELETE
     // 3. (MUST) update order PUT
     // 4. get order by id GET
@@ -52,17 +50,17 @@ public class OrderHandler extends Handler {
         switch(method) {
             case POST:
                 Response<String> post = handlePost(exchange);
-                response = getResponseBodyAsBytes(exchange, post);
+                response = getResponseBodyAsBytes(post, exchange);
                 break;
 
             case GET:
-                Response<Order> get = handleGet(exchange);
-                response = getResponseBodyAsBytes(exchange, get);
+                Response<?> get = handleGet(exchange);
+                response = getResponseBodyAsBytes(get, exchange);
                 break;
 
-            case DELETE:
-                Response<Object> delete = handleDelete(exchange);
-                response = getResponseBodyAsBytes(exchange, delete);
+            case PUT:
+                Response<Order> put = handlePut(exchange);
+                response = getResponseBodyAsBytes(put, exchange);
                 break;
 
             default:
@@ -72,30 +70,66 @@ public class OrderHandler extends Handler {
         return response;
     }
 
-    private Response<Object> handleDelete(HttpExchange exchange) {
-        return null;
+    private Response<Order> handlePut(HttpExchange exchange) {
+        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+        Order updated = orderService.update(readRequestBody(exchange.getRequestBody(), Order.class), user);
+        return Response.<Order>builder()
+                .body(updated)
+                .headers(getHeaders())
+                .status(StatusCode.OK)
+                .build();
     }
 
     // TODO change all gets so that product id is sent as path variable (not parameter)
-    private Response<Order> handleGet(HttpExchange exchange) {
+    private Response<?> handleGet(HttpExchange exchange) {
+        Response<?> response;
+        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+
+        String path = exchange.getRequestURI().getPath();
+        String uri = exchange.getRequestURI().getRawQuery();
         Map<String, List<String>> params = splitQueryList(exchange.getRequestURI().getRawQuery());
-        System.out.println(params);
+
+        String orderId = getIdFromPath(path);
+
+        if (!StringUtils.isNotBlank(orderId)) {
+            response = getOrderById(orderId, user);
+        } else if (params.containsKey("ids")) {
+            response = getOrdersByIds(params.get("ids"), user);
+        } else {
+            response = getOrdersByQuery(params, user);
+        }
+
+        return response;
+    }
+
+    private String getIdFromPath(String path) {
+        return Utils.getIdFromPath(path);
+    }
+
+    private Response<Order> getOrderById(String id, String issuer) {
+        Order order = orderService.get(id, issuer);
+        return Response.<Order>builder()
+                .body(order)
+                .headers(getHeaders())
+                .status(StatusCode.OK)
+                .build();
+    }
+
+    private Response<List<Order>> getOrdersByQuery(Map<String, List<String>> params, String issuer) {
         return null;
     }
 
-    private byte[] getResponseBodyAsBytes(HttpExchange exchange, Response<?> response) throws IOException {
-        exchange.getResponseHeaders().putAll(response.getHeaders());
-        exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
-        return super.writeResponse(response.getBody());
+    private Response<?> getOrdersByIds(List<String> ids, String issuer) {
+        List<Order> orders = orderService.get(ids, issuer);
+        return null;
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
-
         String user = HeaderDecoder.getBasicAuthUsername(exchange);
         String orderId = orderService.create(readRequestBody(exchange.getRequestBody(), Order.class), user);
         return Response.<String>builder()
                 .body(orderId)
-                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .headers(getHeaders())
                 .status(StatusCode.CREATED)
                 .build();
     }

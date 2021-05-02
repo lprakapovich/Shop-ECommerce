@@ -36,6 +36,14 @@ public class Utils {
                 .collect(Collectors.toMap(p -> p[0], p -> p[1]));
     }
 
+    public static String getIdFromPath(String path) {
+        if (StringUtils.isNotBlank(path)) {
+            return null;
+        }
+        String[] pathElements = path.split(PATH_SEPARATOR);
+        return pathElements[pathElements.length - 1];
+    }
+
     private static String decode(final String encoded) {
         try {
             return encoded == null ? null : URLDecoder.decode(encoded, UTF_8_ENCODING);

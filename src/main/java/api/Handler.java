@@ -7,6 +7,7 @@ import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -48,9 +49,15 @@ public abstract class Handler {
         return responseBytes;
     }
 
-    protected static Headers getHeaders(String key, String value) {
+    protected static Headers getHeaders() {
         Headers headers = new Headers();
-        headers.set(key, value);
+        headers.set(util.Constants.CONTENT_TYPE, util.Constants.APPLICATION_JSON);
         return headers;
+    }
+
+    protected  <T> byte[] getResponseBodyAsBytes(Response<T> response, HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().putAll(response.getHeaders());
+        exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
+        return writeResponse(response.getBody());
     }
 }

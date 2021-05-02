@@ -12,9 +12,6 @@ import service.UserService;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static util.Constants.APPLICATION_JSON;
-import static util.Constants.CONTENT_TYPE;
-
 public class RegistrationHandler extends Handler {
 
     private final UserService userService;
@@ -37,23 +34,15 @@ public class RegistrationHandler extends Handler {
         os.close();
     }
 
-    // TODO extend with switch as more endpoints come int
     private byte[] resolveRequest(HttpExchange exchange) throws IOException {
         Response<String> post = handlePost(exchange);
-        return sendResponseBackAsBytes(post, exchange);
-    }
-
-    private byte[] sendResponseBackAsBytes(Response<?> response, HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().putAll(response.getHeaders());
-        // send response back to client, terminated by closing an output stream
-        exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
-        return super.writeResponse(response.getBody());
+        return getResponseBodyAsBytes(post, exchange);
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
         String userId = userService.create(readRequestBody(exchange.getRequestBody(), User.class));
         return Response.<String>builder()
-                .headers(getHeaders(CONTENT_TYPE, APPLICATION_JSON))
+                .headers(getHeaders())
                 .status(StatusCode.CREATED)
                 .body(userId)
                 .build();

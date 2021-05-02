@@ -14,9 +14,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class Order extends DBObject {
-
     private User issuer;
-    private Order orderState;
+    private OrderState orderState;
     private Address shippingAddress;
     private List<OrderedItem> products;
 }

@@ -4,13 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import model.product.Product;
-import model.product.book.Book;
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@BsonDiscriminator
 public class OrderedItem {
-    // TODO: change to Product whet polymorphic deserialization is fixed
+
+     // Bson is a binary-encoded serialization of JSON-like documents
+    @BsonProperty(useDiscriminator = true)
     private Product product;
     private int orderedQuantity;
 }

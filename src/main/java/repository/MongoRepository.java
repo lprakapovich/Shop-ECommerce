@@ -1,6 +1,8 @@
 package repository;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 import static api.Message.*;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
+import static util.Constants.DATABASE_ID;
 
 @AllArgsConstructor
 public class MongoRepository<T extends DBObject> {
@@ -28,15 +32,12 @@ public class MongoRepository<T extends DBObject> {
         return collection.findOneAndDelete(eq("_id", new ObjectId(id)));
     }
 
-    // TODO move exceptions to service
-    public T get(String id) {
-        List<T> products = collection.find(eq("_id", new ObjectId(id))).into(new ArrayList<>());
-        if (products.isEmpty()) {
-            throw new ResourceNotFoundException(ITEM_NOT_FOUND);
-        } else if (products.size() > 1) {
-            throw new NonUniqueQueryResultException(NON_UNIQUE_RESULT);
-        }
-        return products.get(0);
+    public List<T> get(String id) {
+       return collection.find(eq("_id", new ObjectId(id))).into(new ArrayList<>());
+    }
+
+    public List<T> get(List<String> ids) {
+        return collection.find(in(DATABASE_ID, ids)).into(new ArrayList<>());
     }
 
     public T update(T t) {

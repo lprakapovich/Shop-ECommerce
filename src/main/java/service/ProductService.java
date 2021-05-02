@@ -2,6 +2,7 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
+import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
 import repository.ProductRepository;
@@ -25,7 +26,9 @@ public class ProductService <T extends Product> {
     }
 
     public T get(String bookId) {
-        return productRepository.get(bookId);
+        List<T> items = productRepository.get(bookId);
+        validateSingletonList(items);
+        return items.get(0);
     }
 
     public void delete(String id) {
@@ -45,7 +48,7 @@ public class ProductService <T extends Product> {
     public List<T> findByCriteria(HashMap<String, String> criteria) {
         List<T> products = productRepository.findByFieldValues(criteria);
         if (products.isEmpty()) {
-            throw new ResourceNotFoundException(PRODUCTS_CRITERIA_NOT_FOUND);
+            throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
         }
         return products;
     }
@@ -77,6 +80,14 @@ public class ProductService <T extends Product> {
     private void validateProduct(T t) {
         if (t.getQuantity() <= 0 || t.getPrice() <= 0) {
             throw new BadRequestException(INVALID_PRODUCT);
+        }
+    }
+
+    private void validateSingletonList(List<?> items) {
+        if (items.isEmpty()) {
+            throw new ResourceNotFoundException(ITEM_NOT_FOUND);
+        } else if (items.size() > 1) {
+            throw new NonUniqueQueryResultException(NON_UNIQUE_RESULT);
         }
     }
 }
