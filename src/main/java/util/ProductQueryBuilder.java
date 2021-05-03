@@ -4,7 +4,11 @@ import lombok.AllArgsConstructor;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.combine;
@@ -14,11 +18,7 @@ public class ProductQueryBuilder {
 
     static List<Bson> filters;
 
-    public interface FilterApplier {
-        void apply(Map<String, String> params);
-    }
-
-    public static Bson buildQuery(Map<String, String> requestParams) {
+    public static Bson buildQuery(Map<String, List<String>> requestParams) {
         filters = new ArrayList<>();
         Set<String> keys = requestParams.keySet();
 
@@ -41,9 +41,9 @@ public class ProductQueryBuilder {
         return combine(filters);
     }
 
-    private static void addPriceRangeFilter(Map<String, String> requestParams) {
-        String minValue = requestParams.get(PriceGte.paramName);
-        String maxValue = requestParams.get(PriceLte.paramName);
+    private static void addPriceRangeFilter(Map<String, List<String>> requestParams) {
+        String minValue = requestParams.get(PriceGte.paramName).get(0);
+        String maxValue = requestParams.get(PriceLte.paramName).get(0);
         filters.add(and(gte(PriceGte.fieldName, Double.valueOf(minValue)), lte(PriceLte.fieldName, Double.valueOf(maxValue))));
     }
 
@@ -63,30 +63,35 @@ public class ProductQueryBuilder {
     }
 
     private static final FilterApplier PriceGteApplier = (params) -> {
-        filters.add(gte(PriceGte.fieldName, Double.valueOf(params.get(PriceGte.paramName))));
+        filters.add(gte(PriceGte.fieldName, Double.valueOf(params.get(PriceGte.paramName).get(0))));
     };
 
     private static final FilterApplier PriceLteApplier = (params) -> {
-        filters.add(lte(PriceLte.fieldName, Double.valueOf(params.get(PriceLte.paramName))));
+        filters.add(lte(PriceLte.fieldName, Double.valueOf(params.get(PriceLte.paramName).get(0))));
     };
 
     private static final FilterApplier PriceApplier = (params) -> {
-        filters.add(eq(Price.fieldName, Double.valueOf(params.get(Price.paramName))));
+        filters.add(in(Price.fieldName, mapToDoubleList(params.get(Price.paramName))));
     };
 
     private static final FilterApplier AuthorApplier = (params) -> {
-        filters.add(eq(Author.fieldName, params.get(Author.paramName)));
+        filters.add(in(Author.fieldName, params.get(Author.paramName)));
     };
 
     private static final FilterApplier NameApplier = (params) -> {
-        filters.add(eq(Name.fieldName, params.get(Name.paramName)));
+        filters.add(in(Name.fieldName, params.get(Name.paramName)));
     };
 
     private static final FilterApplier GenreApplier = (params) -> {
-        filters.add(eq(Genre.fieldName, params.get(Genre.paramName)));
+        filters.add(in(Genre.fieldName, params.get(Genre.paramName)));
     };
 
     private static final FilterApplier IdApplier = (params) -> {
-        filters.add(eq(Id.fieldName, new ObjectId(params.get(Id.paramName))));
+        filters.add(in(Id.fieldName, params.get(Id.paramName)
+                .stream().map(ObjectId::new).collect(Collectors.toList())));
     };
+
+    private static List<Double> mapToDoubleList(List<String> items) {
+        return items.stream().map(Double::valueOf).collect(Collectors.toList());
+    }
 }

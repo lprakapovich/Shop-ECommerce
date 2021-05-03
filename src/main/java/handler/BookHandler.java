@@ -13,10 +13,12 @@ import service.BookService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
+import static api.Message.CANT_RESOLVE_HTTP_METHOD;
 import static util.Constants.ID;
-import static util.Utils.splitQuery;
+import static util.Utils.splitQueryList;
 
 public class BookHandler extends Handler {
 
@@ -36,15 +38,15 @@ public class BookHandler extends Handler {
     }
 
     private byte[] resolveRequest(HttpExchange exchange) throws IOException {
-        return handleBookRequests(exchange, splitQuery(exchange.getRequestURI().getRawQuery()));
+        return handleBookRequests(exchange, splitQueryList(exchange.getRequestURI().getRawQuery()));
     }
 
-    private byte[] handleBookRequests(HttpExchange exchange, Map<String, String> params) throws IOException {
+    private byte[] handleBookRequests(HttpExchange exchange, Map<String, List<String>> params) throws IOException {
         byte[] response;
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch (method) {
             case GET:
-                Response<?> get = handleGet(params);
+                Response<List<Book>> get = handleGet(params);
                 response = getResponseBodyAsBytes(get, exchange);
                 break;
             case POST:
@@ -60,16 +62,16 @@ public class BookHandler extends Handler {
                 response = getResponseBodyAsBytes(delete, exchange);
                 break;
             default:
-                throw new BadRequestException("Couldn't resolve a HTTP method");
+                throw new BadRequestException(CANT_RESOLVE_HTTP_METHOD);
         }
 
         return response;
     }
 
-    private Response<?> handleGet(Map<String, String> params) {
-        return Response.builder()
+    private Response<List<Book>> handleGet(Map<String, List<String>> params) {
+        return Response.<List<Book>>builder()
                 .headers(getHeaders())
-                .body(params.containsKey(ID) ? bookService.get(params.get(ID)) : bookService.find(params))
+                .body(bookService.find(params))
                 .status(StatusCode.OK)
                 .build();
     }
@@ -93,8 +95,8 @@ public class BookHandler extends Handler {
                 .build();
     }
 
-    private Response<Object> handleDelete(Map<String, String> params) {
-        String id = params.get(ID);
+    private Response<Object> handleDelete(Map<String, List<String>> params) {
+        String id = params.get(ID).get(0);
         bookService.delete(id);
         return Response.builder()
                 .status(StatusCode.NO_CONTENT)

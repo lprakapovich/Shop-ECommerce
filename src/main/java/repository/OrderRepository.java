@@ -3,9 +3,7 @@ package repository;
 import com.mongodb.client.MongoCollection;
 import model.order.Order;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class OrderRepository extends MongoRepository<Order> {
 
@@ -18,12 +16,5 @@ public class OrderRepository extends MongoRepository<Order> {
                 .stream()
                 .filter(order -> order.getIssuer().getEmail().equals(issuer))
                 .findFirst();
-    }
-
-    public List<Order> get(List<String> ids, String issuer) {
-        return super.get(ids)
-                .stream()
-                .filter(order -> order.getIssuer().getEmail().equals(issuer))
-                .collect(Collectors.toList());
     }
 }

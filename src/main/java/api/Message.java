@@ -14,6 +14,7 @@ public class Message {
     public static final String PRODUCTS_NOT_FOUND = "Products with a given criteria not found";
     public static final String ORDER_NOT_FOUND = "Order not found";
 
+    public static final String CANT_RESOLVE_HTTP_METHOD = "Couldn't resolve a HTTP method";
     public static final String MISSING_AUTH_HEADER = "Missing authorization header";
     public static final String NON_UNIQUE_RESULT = "Query returned non-unique result";
     public static final String INVALID_PRODUCT = "Product data is invalid";

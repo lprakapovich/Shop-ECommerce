@@ -5,10 +5,13 @@ import exception.BadRequestException;
 import exception.ResourceNotFoundException;
 import model.order.Order;
 import repository.OrderRepository;
+import util.OrderQueryBuilder;
 
 import java.util.List;
+import java.util.Map;
 
-import static api.Message.*;
+import static api.Message.ORDER_NOT_FOUND;
+import static api.Message.USERNAME_MISMATCH;
 
 public class OrderService {
 
@@ -27,10 +30,8 @@ public class OrderService {
         return orderId;
     }
 
-    public List<Order> get(List<String> ids, String authenticatedUser) {
-        List<Order> orders = orderRepository.get(ids, authenticatedUser);
-        validateList(orders);
-        return orders;
+    public List<Order> get(Map<String, List<String>> criteria) {
+        return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
     }
 
     public Order get(String id, String authenticatedUser) {
@@ -46,12 +47,6 @@ public class OrderService {
     private void validateOrder(Order order, String authenticatedUser) {
         if (!order.getIssuer().getEmail().equals(authenticatedUser)) {
             throw new BadRequestException(USERNAME_MISMATCH);
-        }
-    }
-
-    private void validateList(List<?> items) {
-        if (items.isEmpty()) {
-            throw new ResourceNotFoundException(ITEM_NOT_FOUND);
         }
     }
 }

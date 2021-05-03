@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import model.DBObject;
 import model.product.book.Book;
 import model.product.game.BoardGame;
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 
 import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
@@ -19,6 +20,7 @@ import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
         @Type(value = Book.class, name = "book"),
         @Type(value = BoardGame.class, name = "gameBoard")
 })
+@BsonDiscriminator
 public abstract class Product extends DBObject {
 
     private String name;

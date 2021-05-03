@@ -6,8 +6,8 @@ import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
 import repository.ProductRepository;
+import util.ProductQueryBuilder;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +46,8 @@ public class ProductService <T extends Product> {
         return updated;
     }
 
-    public List<T> find(Map<String, String> criteria) {
-        List<T> products = productRepository.findByFieldValues(criteria);
+    public List<T> find(Map<String, List<String>> criteria) {
+        List<T> products = productRepository.find(ProductQueryBuilder.buildQuery(criteria));
         if (products.isEmpty()) {
             throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
         }
