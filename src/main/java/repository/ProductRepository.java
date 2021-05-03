@@ -2,11 +2,12 @@ package repository;
 
 import com.mongodb.client.MongoCollection;
 import model.product.Product;
+import org.bson.conversions.Bson;
+import util.ProductQueryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.mongodb.client.model.Filters.*;
+import java.util.Map;
 
 public class ProductRepository<T extends Product> extends MongoRepository<T> {
 
@@ -14,16 +15,10 @@ public class ProductRepository<T extends Product> extends MongoRepository<T> {
         super(collection);
     }
 
-    public List<T> findByPriceRange(double max, double min) {
-        return collection.find(and(gte("price", min), lte("price", max))).into(new ArrayList<>());
-    }
-
-    public List<T> findByPriceHigherThan(double min) {
-        return collection.find((gte("price", min))).into(new ArrayList<>());
-    }
-
-    public List<T> findByPriceLowerThan(double max) {
-        return collection.find((lte("price", max))).into(new ArrayList<>());
+    @Override
+    public List<T> findByFieldValues(Map<String, String> params) {
+        Bson bson = ProductQueryBuilder.buildQuery(params);
+        return collection.find(bson).into(new ArrayList<>());
     }
 }
 

@@ -17,23 +17,22 @@ public class Utils {
         if (!StringUtils.isNotBlank(query)) {
             return Collections.emptyMap();
         }
-        Map<String, List<String>> collect = Pattern.compile(URI_PARAM_SEPARATOR)
+
+        return Pattern.compile(URI_PARAM_SEPARATOR)
                 .splitAsStream(query)
                 .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
                 .collect(groupingBy(s -> decode(s[0]),
                         mapping(s -> decode(s[1]), toList())));
-
-        return collect;
-
     }
 
     public static Map<String, String> splitQuery(String query) {
         if (!StringUtils.isNotBlank(query)) {
             return Collections.emptyMap();
         }
+
         return Pattern.compile(URI_PARAM_SEPARATOR).splitAsStream(query)
                 .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
-                .collect(Collectors.toMap(p -> p[0], p -> p[1]));
+                .collect(Collectors.toMap(p -> decode(p[0]), p -> decode(p[1])));
     }
 
     public static String getIdFromPath(String path) {

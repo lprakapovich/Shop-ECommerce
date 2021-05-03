@@ -25,6 +25,11 @@ public abstract class Handler {
         }
     }
 
+    /**
+     * Execute HTTP request
+     * @param exchange gives control over incoming request (input stream) and output response (output stream)
+     * @throws IOException I/O error
+     */
     protected abstract void execute(HttpExchange exchange) throws Exception;
 
     protected <T> T readRequestBody(InputStream body, Class<T> type) {

@@ -35,14 +35,6 @@ public class OrderHandler extends Handler {
         os.close();
     }
 
-    //TODO
-    // 1. create order POST - d
-    // 2. delete order DELETE
-    // 3. (MUST) update order PUT
-    // 4. get order by id GET
-    // 5. get user -> read orderIds -> get all user orders
-    // 6. get product -> read orderIds -> get all orders in which the product appeared
-
     private byte[] resolveResponse(HttpExchange exchange) throws IOException {
         byte[] response;
 
@@ -80,7 +72,7 @@ public class OrderHandler extends Handler {
                 .build();
     }
 
-    // TODO change all gets so that product id is sent as path variable (not parameter)
+    // TODO refactor: change all gets so that product id is sent as path variable (not parameter)
     private Response<?> handleGet(HttpExchange exchange) {
         Response<?> response;
         String user = HeaderDecoder.getBasicAuthUsername(exchange);

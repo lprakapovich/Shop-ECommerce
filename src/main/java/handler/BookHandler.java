@@ -8,11 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
+import model.order.Order;
 import model.product.book.Book;
+import model.product.book.Genre;
 import service.BookService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 import static util.Constants.ID;
@@ -44,7 +47,7 @@ public class BookHandler extends Handler {
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch (method) {
             case GET:
-                Response<Book> get = handleGet(params);
+                Response<?> get = handleGet(params);
                 response = getResponseBodyAsBytes(get, exchange);
                 break;
             case POST:
@@ -66,11 +69,16 @@ public class BookHandler extends Handler {
         return response;
     }
 
-    private Response<Book> handleGet(Map<String, String> params) {
-        String bookId = params.get(ID);
-        return Response.<Book>builder()
+    private Response<?> handleGet(Map<String, String> params) {
+
+        // check if there are any params
+
+        List<Book> books = bookService.find(params);
+
+        //String bookId = params.get(ID);
+        return Response.builder()
                 .headers(getHeaders())
-                .body(bookService.get(bookId))
+                .body(books)
                 .status(StatusCode.OK)
                 .build();
     }

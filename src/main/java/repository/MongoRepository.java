@@ -49,11 +49,7 @@ public class MongoRepository<T extends DBObject> {
     }
 
     public List<T> findByFieldValues(Map<String, String> queryParams) {
-        ArrayList<T> items = collection.find(generateQuery(queryParams)).into(new ArrayList<>());
-        if (items.isEmpty()) {
-            throw new ResourceNotFoundException(QUERY_NO_RESULT);
-        }
-        return items;
+        return collection.find(generateQuery(queryParams)).into(new ArrayList<>());
     }
 
     public boolean existsByFieldValue(String field, String value) {

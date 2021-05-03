@@ -2,15 +2,11 @@ package util;
 
 public class Constants {
 
-    public static final String MONGO_HOST = "127.0.0.1";
-    public static final String MONGO_REALM = "Realm";
-    public static final int MONGO_PORT = 27017;
     public static final int SERVER_PORT = 8000;
 
     public static final String DATABASE = "bookstore";
     public static final String USERS_COLLECTION = "users";
     public static final String BOOKS_COLLECTION = "books";
-    public static final String GAMES_COLLECTION = "games";
     public static final String ORDERS_COLLECTION = "orders";
 
     public static final String CONTENT_TYPE = "Content-Type";

@@ -9,6 +9,7 @@ import repository.ProductRepository;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static api.Message.*;
 
@@ -45,34 +46,10 @@ public class ProductService <T extends Product> {
         return updated;
     }
 
-    public List<T> findByCriteria(HashMap<String, String> criteria) {
+    public List<T> find(Map<String, String> criteria) {
         List<T> products = productRepository.findByFieldValues(criteria);
         if (products.isEmpty()) {
             throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
-        }
-        return products;
-    }
-
-    public List<T> findByPriceInRange(double max, double min) {
-        List<T> products = productRepository.findByPriceRange(max, min);
-        if (products.isEmpty()) {
-            throw new ResourceNotFoundException("Products in a given price range could not be found");
-        }
-        return products;
-    }
-
-    public List<T> findByPriceHigherThan(double min) {
-        List<T> products = productRepository.findByPriceHigherThan(min);
-        if (products.isEmpty()) {
-            throw new ResourceNotFoundException("Products in a given price range could not be found");
-        }
-        return products;
-    }
-
-    public List<T> findByPriceLowerThan(double max) {
-        List<T> products = productRepository.findByPriceLowerThan(max);
-        if (products.isEmpty()) {
-            throw new ResourceNotFoundException("Products in a given price range could not be found");
         }
         return products;
     }

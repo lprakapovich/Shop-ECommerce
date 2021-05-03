@@ -21,11 +21,6 @@ public class RegistrationHandler extends Handler {
         this.userService = userService;
     }
 
-    /**
-     * Execute HTTP request
-     * @param exchange gives control over incoming request (input stream) and output response (output stream)
-     * @throws IOException I/O error
-     */
     @Override
     protected void execute(HttpExchange exchange) throws IOException {
         byte[] response = resolveRequest(exchange);
