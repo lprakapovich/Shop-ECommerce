@@ -8,14 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
-import model.order.Order;
 import model.product.book.Book;
-import model.product.book.Genre;
 import service.BookService;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 
 import static util.Constants.ID;
@@ -70,15 +67,9 @@ public class BookHandler extends Handler {
     }
 
     private Response<?> handleGet(Map<String, String> params) {
-
-        // check if there are any params
-
-        List<Book> books = bookService.find(params);
-
-        //String bookId = params.get(ID);
         return Response.builder()
                 .headers(getHeaders())
-                .body(books)
+                .body(params.containsKey(ID) ? bookService.get(params.get(ID)) : bookService.find(params))
                 .status(StatusCode.OK)
                 .build();
     }

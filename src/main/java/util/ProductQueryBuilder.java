@@ -2,6 +2,7 @@ package util;
 
 import lombok.AllArgsConstructor;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 
@@ -20,15 +21,15 @@ public class ProductQueryBuilder {
     public static Bson buildQuery(Map<String, String> requestParams) {
         filters = new ArrayList<>();
         Set<String> keys = requestParams.keySet();
-        if (!keys.isEmpty()) {
 
+        if (!keys.isEmpty()) {
             if (keys.contains(PriceGte.paramName) && keys.contains(PriceLte.paramName)) {
                 addPriceRangeFilter(requestParams);
                 keys.remove(PriceGte.paramName);
                 keys.remove(PriceLte.paramName);
             }
 
-            for(String key : keys) {
+            for (String key : keys) {
                 for (QueryParam param : QueryParam.values()) {
                     if (param.paramName.equals(key)) {
                         param.filterApplier.apply(requestParams);
@@ -36,6 +37,7 @@ public class ProductQueryBuilder {
                 }
             }
         }
+
         return combine(filters);
     }
 
@@ -52,7 +54,8 @@ public class ProductQueryBuilder {
         Author("author", "author", AuthorApplier),
         Price("price", "price", PriceApplier),
         Genre("genre", "genre", GenreApplier),
-        Name("name", "name", NameApplier);
+        Name("name", "name", NameApplier),
+        Id("id", "_id", IdApplier);
 
         private final String paramName;
         private final String fieldName;
@@ -81,5 +84,9 @@ public class ProductQueryBuilder {
 
     private static final FilterApplier GenreApplier = (params) -> {
         filters.add(eq(Genre.fieldName, params.get(Genre.paramName)));
+    };
+
+    private static final FilterApplier IdApplier = (params) -> {
+        filters.add(eq(Id.fieldName, new ObjectId(params.get(Id.paramName))));
     };
 }

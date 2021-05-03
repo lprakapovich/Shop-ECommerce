@@ -2,16 +2,11 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
-import exception.ResourceNotFoundException;
 import model.product.book.Book;
-import model.product.book.Genre;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static api.Message.*;
 
 public class BookService extends ProductService<Book> {
 
@@ -33,21 +28,5 @@ public class BookService extends ProductService<Book> {
         if (productRepository.existsByFieldValues(params)) {
             throw new BadRequestException("Repeated book name / author");
         }
-    }
-
-    public List<Book> findByGenre(Genre genre) {
-        List<Book> books = productRepository.findByFieldValue("genre", genre);
-        if (books.isEmpty()) {
-            throw new ResourceNotFoundException(BOOKS_BY_GENRE_NOT_FOUND);
-        }
-        return books;
-    }
-
-    public List<Book> findByAuthor(String author) {
-        List<Book> books = productRepository.findByFieldValue("author", author);
-        if (books.isEmpty()) {
-            throw new ResourceNotFoundException(BOOKS_BY_AUTHOR_NOT_FOUND);
-        }
-        return books;
     }
 }
