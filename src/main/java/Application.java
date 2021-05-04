@@ -1,13 +1,16 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
+import exception.GlobalExceptionHandler;
 import handler.BookHandler;
 import handler.OrderHandler;
 import handler.RegistrationHandler;
 import model.order.Order;
+import model.product.Product;
 import model.product.book.Book;
 import model.user.User;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -37,8 +40,12 @@ public class Application {
         ConnectionString connectionString = new ConnectionString("mongodb://localhost");
 
         // direct serialization of POJOs to and from BSON
-        CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
+        // Book.class is registered explicitly because codes is not found otherwise
+        CodecRegistry pojoCodecRegistry = fromProviders(
+                PojoCodecProvider.builder().register(model.product.book.Book.class).automatic(true).build());
+
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
+        PojoCodecProvider.builder().register(Product.class);
 
         MongoClientSettings clientSettings = MongoClientSettings.builder()
                 .applyConnectionString(connectionString)
@@ -53,25 +60,22 @@ public class Application {
     private static void configAPI() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT),0);
 
-        UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
+        ObjectMapper mapper = Configuration.getObjectMapper();
+        GlobalExceptionHandler exceptionHandler = Configuration.getExceptionHandler();
 
-        RegistrationHandler registrationHandler = new RegistrationHandler(
-                Configuration.getObjectMapper(),
-                Configuration.getExceptionHandler(),
-                userService);
+        UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
+        BookService bookService = new BookService(database.getCollection(BOOKS_COLLECTION, Book.class));
+        OrderService orderService = new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService);
+
+        RegistrationHandler registrationHandler = new RegistrationHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/users/register", registrationHandler::handle);
 
-        BookHandler productHandler = new BookHandler(
-                Configuration.getObjectMapper(),
-                Configuration.getExceptionHandler(),
-                new BookService(database.getCollection(BOOKS_COLLECTION, Book.class)));
+        BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
         server.createContext("/api/products/books", productHandler::handle);
 
-        OrderHandler orderHandler = new OrderHandler(
-                Configuration.getObjectMapper(),
-                Configuration.getExceptionHandler(),
-                new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService));
+        OrderHandler orderHandler = new OrderHandler(mapper, exceptionHandler, orderService);
         server.createContext("/api/orders", orderHandler::handle);
+
         server.setExecutor(null);
         server.start();
     }

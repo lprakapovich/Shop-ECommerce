@@ -1,13 +1,20 @@
 package model.product.book;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import model.product.Product;
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@BsonDiscriminator(value = Book.TYPE, key = Product.DISCRIMINATOR_KEY)
 public class Book extends Product {
+
+    public static final String TYPE = "book";
 
     private String author;
 
