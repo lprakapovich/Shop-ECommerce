@@ -10,8 +10,8 @@ import util.OrderQueryBuilder;
 import java.util.List;
 import java.util.Map;
 
-import static api.Message.ORDER_NOT_FOUND;
-import static api.Message.USERNAME_MISMATCH;
+import static api.Message.*;
+import static model.order.OrderState.Cart;
 
 public class OrderService {
 
@@ -24,7 +24,8 @@ public class OrderService {
     }
 
     public String create(Order order, String authenticatedUser) {
-        validateOrder(order, authenticatedUser);
+        check(order, authenticatedUser);
+        order.setOrderState(Cart);
         String orderId = orderRepository.create(order);
         userService.updateUserOrderList(authenticatedUser, orderId);
         return orderId;
@@ -40,13 +41,36 @@ public class OrderService {
     }
 
     public Order update(Order order, String authenticatedUser) {
-        validateOrder(order, authenticatedUser);
+        check(order, authenticatedUser);
         return orderRepository.update(order);
     }
 
-    private void validateOrder(Order order, String authenticatedUser) {
+    private void check(Order order, String authenticatedUser) {
+        validateIssuer(order, authenticatedUser);
+        validateOrder(order);
+        validateProducts(order);
+    }
+
+    private void validateProducts(Order order) {
+        order.getProducts().stream()
+                .forEach(product -> {
+
+                });
+    }
+
+    private void validateOrder(Order order) {
+        if (missingProductsData(order)) {
+            throw new BadRequestException(INVALID_ORDER);
+        }
+    }
+
+    private void validateIssuer(Order order, String authenticatedUser) {
         if (!order.getIssuer().getEmail().equals(authenticatedUser)) {
             throw new BadRequestException(USERNAME_MISMATCH);
         }
+    }
+
+    private boolean missingProductsData(Order order) {
+        return order.getProducts().isEmpty();
     }
 }

@@ -39,6 +39,7 @@ public class ProductService <T extends Product> {
     }
 
     public T update(T t) {
+        validateProduct(t);
         T updated = productRepository.update(t);
         if (updated == null) {
             throw new BadRequestException(ITEM_NOT_FOUND);
@@ -55,7 +56,7 @@ public class ProductService <T extends Product> {
     }
 
     private void validateProduct(T t) {
-        if (t.getQuantity() <= 0 || t.getPrice() <= 0) {
+        if (t.getQuantity() < 0 || t.getPrice() <= 0) {
             throw new BadRequestException(INVALID_PRODUCT);
         }
     }

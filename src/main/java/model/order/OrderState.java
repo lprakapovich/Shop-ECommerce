@@ -2,7 +2,7 @@ package model.order;
 
 public enum OrderState {
     Cart,
-    Paid,
+    Processed,
     Shipped,
     Finished
 }

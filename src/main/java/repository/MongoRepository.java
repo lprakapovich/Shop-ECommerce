@@ -1,6 +1,9 @@
 package repository;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
 import lombok.AllArgsConstructor;
 import model.DBObject;
 import org.bson.Document;
@@ -39,7 +42,10 @@ public class MongoRepository<T extends DBObject> {
     public List<T> find(Bson query) { return collection.find(query).into(new ArrayList<>()); }
 
     public T update(T t) {
-        return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t);
+        FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
+        options.returnDocument(ReturnDocument.AFTER);
+        options.upsert(true);
+        return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t, options);
     }
 
     public boolean existsByFieldValue(String field, String value) {

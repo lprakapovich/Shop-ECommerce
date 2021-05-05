@@ -18,6 +18,7 @@ public class Message {
     public static final String MISSING_AUTH_HEADER = "Missing authorization header";
     public static final String NON_UNIQUE_RESULT = "Query returned non-unique result";
     public static final String INVALID_PRODUCT = "Product data is invalid";
+    public static final String INVALID_ORDER = "Order data is invalid or missing";
     public static final String INVALID_METHOD = "Invalid method name (must be POST, PUT, GET, or DELETE";
     public static final String USERNAME_MISMATCH = "Username doesn't match the one from authentication header";
 }
