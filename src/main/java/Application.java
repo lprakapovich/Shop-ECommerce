@@ -22,7 +22,10 @@ import service.UserService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -44,7 +47,7 @@ public class Application {
         // direct serialization of POJOs to and from BSON
         // Book.class is registered explicitly because codes is not found otherwise
         CodecRegistry pojoCodecRegistry = fromProviders(
-                PojoCodecProvider.builder().register(model.product.book.Book.class).automatic(true).build());
+                PojoCodecProvider.builder().register(model.product.book.Book.class, model.product.Product.class).automatic(true).build());
 
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
         PojoCodecProvider.builder().register(Product.class);
@@ -65,9 +68,15 @@ public class Application {
         ObjectMapper mapper = Configuration.getObjectMapper();
         GlobalExceptionHandler exceptionHandler = Configuration.getExceptionHandler();
 
+
         UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
         BookService bookService = new BookService(database.getCollection(BOOKS_COLLECTION, Book.class));
-        OrderService orderService = new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService);
+//        List<ProductService> services = new ArrayList<>();
+//        services.add(bookService);
+
+        Map<Class<? extends Product>, ProductService> services = new HashMap<>();
+        services.put(Book.class, bookService);
+        OrderService orderService = new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService, services);
 
         RegistrationHandler registrationHandler = new RegistrationHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/users/register", registrationHandler::handle);

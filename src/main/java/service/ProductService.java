@@ -5,6 +5,7 @@ import exception.BadRequestException;
 import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
+import org.bson.types.ObjectId;
 import repository.ProductRepository;
 import util.ProductQueryBuilder;
 
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.*;
+
+// TODO rethink if there's really a need to parametrize it
 
 public class ProductService <T extends Product> {
 
@@ -26,8 +29,8 @@ public class ProductService <T extends Product> {
         return productRepository.create(t);
     }
 
-    public T get(String bookId) {
-        List<T> items = productRepository.get(bookId);
+    public T get(ObjectId id) {
+        List<T> items = productRepository.get(id);
         validateSingletonList(items);
         return items.get(0);
     }
@@ -47,6 +50,10 @@ public class ProductService <T extends Product> {
         return updated;
     }
 
+    public T update(ObjectId id, String field, Object value) {
+        return productRepository.update(id, field, value);
+    }
+
     public List<T> find(Map<String, List<String>> criteria) {
         List<T> products = productRepository.find(ProductQueryBuilder.buildQuery(criteria));
         if (products.isEmpty()) {
@@ -55,8 +62,12 @@ public class ProductService <T extends Product> {
         return products;
     }
 
+    public boolean existsById(ObjectId id) {
+        return productRepository.existsById(id);
+    }
+
     private void validateProduct(T t) {
-        if (t.getQuantity() < 0 || t.getPrice() <= 0) {
+        if (t.getCurrentDbQuantity() < 0 || t.getPrice() <= 0) {
             throw new BadRequestException(INVALID_PRODUCT);
         }
     }

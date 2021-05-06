@@ -17,7 +17,7 @@ import java.util.List;
 public class Order extends DBObject {
     private User issuer;
     private OrderState orderState;
-    private List<OrderedItem> products;
+    private List<OrderedItem> orderedItems;
     private LocalDate date;
     private LocalDate lastModifiedDate;
     private Address shippingAddress;

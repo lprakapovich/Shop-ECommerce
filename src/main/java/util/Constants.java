@@ -23,6 +23,7 @@ public class Constants {
     public static final String ID = "id";
     public static final String DATABASE_ID = "_id";
     public static final String ORDER_IDS = "orderIds";
+    public static final String QUANTITY = "quantity";
 
     public static final int PARAM_ARRAY_SIZE = 2;
 }

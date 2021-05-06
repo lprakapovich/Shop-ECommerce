@@ -1,28 +1,31 @@
 package model.product;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import model.DBObject;
+import model.product.book.Book;
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@BsonDiscriminator(key = Product.DISCRIMINATOR_KEY)
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Book.class, name = "book")})
+@BsonDiscriminator
 public abstract class Product extends DBObject {
-
-    public static final String DISCRIMINATOR_KEY = "type";
 
     private String name;
     private double price;
-    private int quantity;
+    private int currentDbQuantity;
 
-    public Product(String name, double price, int quantity) {
+    public Product(String name, double price, int dbQuantity) {
         super();
         this.name = name;
         this.price = price;
-        this.quantity = quantity;
+        this.currentDbQuantity = dbQuantity;
     }
 }
