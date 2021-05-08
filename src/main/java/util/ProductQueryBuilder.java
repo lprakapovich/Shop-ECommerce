@@ -16,7 +16,7 @@ import static util.ProductQueryBuilder.QueryParam.*;
 
 public class ProductQueryBuilder {
 
-    static List<Bson> filters;
+   private static List<Bson> filters;
 
     public static Bson buildQuery(Map<String, List<String>> requestParams) {
         filters = new ArrayList<>();

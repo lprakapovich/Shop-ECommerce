@@ -1,6 +1,7 @@
 package handler;
 
 import api.Handler;
+import api.PreflightResponder;
 import api.Response;
 import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +12,8 @@ import service.UserService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static api.Method.OPTIONS;
 
 public class RegistrationHandler extends Handler {
 
@@ -23,10 +26,14 @@ public class RegistrationHandler extends Handler {
 
     @Override
     protected void execute(HttpExchange exchange) throws IOException {
-        byte[] response = resolveRequest(exchange);
-        OutputStream os = exchange.getResponseBody();
-        os.write(response);
-        os.close();
+        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
+            PreflightResponder.sendPreflightCheckResponse(exchange);
+        } else {
+            byte[] response = resolveRequest(exchange);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
     }
 
     private byte[] resolveRequest(HttpExchange exchange) throws IOException {

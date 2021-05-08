@@ -1,9 +1,6 @@
 package handler;
 
-import api.Handler;
-import api.Method;
-import api.Response;
-import api.StatusCode;
+import api.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
@@ -17,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.CANT_RESOLVE_HTTP_METHOD;
+import static api.Method.OPTIONS;
 import static util.Constants.ID;
 import static util.Utils.splitQueryList;
 
@@ -31,10 +29,14 @@ public class BookHandler extends Handler {
 
     @Override
     protected void execute(HttpExchange exchange) throws Exception {
-        byte[] response = resolveRequest(exchange);
-        OutputStream os = exchange.getResponseBody();
-        os.write(response);
-        os.close();
+        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
+            PreflightResponder.sendPreflightCheckResponse(exchange);
+        } else {
+            byte[] response = resolveRequest(exchange);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
     }
 
     private byte[] resolveRequest(HttpExchange exchange) throws IOException {

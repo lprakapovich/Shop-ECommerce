@@ -20,6 +20,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
 import static util.Constants.DATABASE_ID;
 
+// TODO refactor getting by id (wither string or ObjectId)
 @AllArgsConstructor
 public class MongoRepository<T extends DBObject> {
 
@@ -52,22 +53,16 @@ public class MongoRepository<T extends DBObject> {
         return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t, options);
     }
 
+    public boolean exists(Bson query) {
+        return collection.find(query).first() != null;
+    }
+
     public boolean existsById(ObjectId id) {
         return collection.find(eq(DATABASE_ID, id)).first() != null;
     }
 
     public boolean existsByFieldValue(String field, String value) {
         return collection.find(eq(field, value)).first() != null;
-    }
-
-    public boolean existsByFieldValues(Map<String, String> queryParams) {
-        return collection.find(generateQuery(queryParams)).first() != null;
-    }
-
-    private Document generateQuery(Map<String, String> queryParams) {
-        Document query = new Document();
-        queryParams.keySet().forEach(key -> query.append(key, queryParams.get(key)));
-        return query;
     }
 
     public T update(ObjectId id, String field, Object value) {

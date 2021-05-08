@@ -2,6 +2,7 @@ package exception;
 
 import api.ErrorResponse;
 import api.ErrorResponse.ErrorResponseBuilder;
+import api.PreflightResponder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-
+import static api.Method.OPTIONS;
 import static api.StatusCode.*;
 import static util.Constants.APPLICATION_JSON;
 import static util.Constants.CONTENT_TYPE;
@@ -22,11 +23,17 @@ public class GlobalExceptionHandler {
     public void handle(Throwable throwable, HttpExchange exchange) {
         try {
             throwable.printStackTrace();
-            exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
-            ErrorResponse errorResponse = getErrorResponse(throwable, exchange);
-            OutputStream responseBody = exchange.getResponseBody();
-            responseBody.write(objectMapper.writeValueAsBytes(errorResponse));
-            responseBody.close();
+
+            if (exchange.getRequestMethod().equals(OPTIONS.getName())) {
+                PreflightResponder.sendPreflightCheckResponse(exchange);
+            } else {
+                exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                ErrorResponse errorResponse = getErrorResponse(throwable, exchange);
+                OutputStream responseBody = exchange.getResponseBody();
+                responseBody.write(objectMapper.writeValueAsBytes(errorResponse));
+                responseBody.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,7 +17,7 @@ import static util.OrderQueryBuilder.QueryParam.Status;
 
 public class OrderQueryBuilder {
 
-    static List<Bson> filters;
+   private static List<Bson> filters;
 
     public static Bson buildQuery(Map<String, List<String>> requestParams) {
         filters = new ArrayList<>();

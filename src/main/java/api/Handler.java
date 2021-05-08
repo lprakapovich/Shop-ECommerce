@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static util.Constants.*;
+
 
 @RequiredArgsConstructor
 public abstract class Handler {
@@ -45,8 +47,6 @@ public abstract class Handler {
     protected <T> byte[] writeResponse(T response) {
         byte[] responseBytes;
         try {
-            String s = objectMapper.writeValueAsString(response);
-            System.out.println(s);
             responseBytes = objectMapper.writeValueAsBytes(response);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -56,13 +56,20 @@ public abstract class Handler {
 
     protected static Headers getHeaders() {
         Headers headers = new Headers();
-        headers.set(util.Constants.CONTENT_TYPE, util.Constants.APPLICATION_JSON);
+        headers.set(ALLOW_ORIGIN, ALL);
+        headers.set(ALLOW_HEADERS, HEADERS);
+        headers.set(ALLOW_METHODS, "GET, HEAD, OPTIONS, POST, PUT");
+        headers.set(CONTENT_TYPE, APPLICATION_JSON);
         return headers;
     }
 
     protected  <T> byte[] getResponseBodyAsBytes(Response<T> response, HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().putAll(response.getHeaders());
-        exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
-        return writeResponse(response.getBody());
+            exchange.getResponseHeaders().putAll(response.getHeaders());
+            exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
+            return writeResponse(response.getBody());
+    }
+
+    // TODO filter this data
+    protected void sendPreflightCheckResponse(HttpExchange exchange) throws IOException {
     }
 }

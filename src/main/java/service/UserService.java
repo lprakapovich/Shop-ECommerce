@@ -23,6 +23,7 @@ public class UserService {
     }
 
     private void validateUser(User user) {
+
         if (userRepository.existsByFieldValue("email", user.getEmail())) {
             throw new BadRequestException(USER_DUPLICATED_EMAIL);
         }

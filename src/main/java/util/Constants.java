@@ -13,6 +13,11 @@ public class Constants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String AUTHORIZATION = "Authorization";
+    public static final String ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    public static final String ALLOW_METHODS = "Access-Control-Allow-Methods";
+    public static final String ALLOW_HEADERS = "Access-Control-Allow-Headers";
+    public static final String HEADERS = "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers";
+    public static final String ALL = "*";
 
     public static final String EQUALS = "=";
     public static final String URI_PARAM_SEPARATOR = "&";
@@ -24,6 +29,8 @@ public class Constants {
     public static final String DATABASE_ID = "_id";
     public static final String ORDER_IDS = "orderIds";
     public static final String QUANTITY = "quantity";
+    public static final String AUTHOR = "author";
+    public static final String NAME = "name";
 
     public static final int PARAM_ARRAY_SIZE = 2;
 }

@@ -68,11 +68,8 @@ public class Application {
         ObjectMapper mapper = Configuration.getObjectMapper();
         GlobalExceptionHandler exceptionHandler = Configuration.getExceptionHandler();
 
-
         UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
         BookService bookService = new BookService(database.getCollection(BOOKS_COLLECTION, Book.class));
-//        List<ProductService> services = new ArrayList<>();
-//        services.add(bookService);
 
         Map<Class<? extends Product>, ProductService> services = new HashMap<>();
         services.put(Book.class, bookService);
