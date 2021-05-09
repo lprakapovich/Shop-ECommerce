@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.*;
-import static model.order.OrderState.*;
+import static model.order.OrderState.Cart;
+import static model.order.OrderState.Processed;
 import static util.Constants.QUANTITY;
 
 public class OrderService {
