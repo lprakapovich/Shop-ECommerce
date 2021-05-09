@@ -6,7 +6,10 @@ import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.product.book.Book;
+import org.bson.types.ObjectId;
+import org.codehaus.plexus.util.StringUtils;
 import service.BookService;
+import util.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +19,7 @@ import java.util.Map;
 import static api.Message.CANT_RESOLVE_HTTP_METHOD;
 import static api.Method.OPTIONS;
 import static util.Constants.ID;
+import static util.Utils.getIdFromPath;
 import static util.Utils.splitQueryList;
 
 public class BookHandler extends Handler {
@@ -48,7 +52,7 @@ public class BookHandler extends Handler {
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch (method) {
             case GET:
-                Response<List<Book>> get = handleGet(params);
+                Response<Object> get = handleGet(exchange, params);
                 response = getResponseBodyAsBytes(get, exchange);
                 break;
             case POST:
@@ -70,10 +74,11 @@ public class BookHandler extends Handler {
         return response;
     }
 
-    private Response<List<Book>> handleGet(Map<String, List<String>> params) {
-        return Response.<List<Book>>builder()
+    private Response<Object> handleGet(HttpExchange exchange, Map<String, List<String>> params) {
+        String idFromPath = getIdFromPath(exchange.getRequestURI().getRawPath());
+              return Response.builder()
                 .headers(getHeaders())
-                .body(bookService.find(params))
+                .body(StringUtils.isNotBlank(idFromPath) ? bookService.get(new ObjectId(idFromPath)) : bookService.find(params))
                 .status(StatusCode.OK)
                 .build();
     }

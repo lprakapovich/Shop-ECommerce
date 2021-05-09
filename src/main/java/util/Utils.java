@@ -1,6 +1,7 @@
 package util;
 
 import org.apache.maven.shared.utils.StringUtils;
+import org.bson.types.ObjectId;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -9,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
+import static org.apache.commons.lang3.StringUtils.*;
 import static util.Constants.*;
 import static java.util.stream.Collectors.*;
 
@@ -36,11 +38,12 @@ public class Utils {
     }
 
     public static String getIdFromPath(String path) {
-        if (StringUtils.isNotBlank(path)) {
-            return null;
+        if (!StringUtils.isNotBlank(path)) {
+            return EMPTY;
         }
         String[] pathElements = path.split(PATH_SEPARATOR);
-        return pathElements[pathElements.length - 1];
+        String optionalId = pathElements[pathElements.length - 1];
+        return ObjectId.isValid(optionalId) ? optionalId : EMPTY;
     }
 
     private static String decode(final String encoded) {
