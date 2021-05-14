@@ -67,7 +67,7 @@ public class ProductService <T extends Product> {
     }
 
     private void validateProduct(T t) {
-        if (t.getCurrentDbQuantity() < 0 || t.getPrice() <= 0) {
+        if (t.getAvailableQuantity() < 0 || t.getPrice() <= 0) {
             throw new BadRequestException(INVALID_PRODUCT);
         }
     }

@@ -6,8 +6,11 @@ import exception.ResourceNotFoundException;
 import model.user.User;
 import repository.UserRepository;
 
-import static api.Message.USER_DUPLICATED_EMAIL;
-import static api.Message.USER_NOT_FOUND;
+import java.util.List;
+
+import static api.Message.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 
 public class UserService {
 
@@ -22,8 +25,16 @@ public class UserService {
         return userRepository.create(user);
     }
 
-    private void validateUser(User user) {
+    public User authenticate(String encryptedEmail, String encryptedPassword) {
+        List<User> users = userRepository.find(and(eq("password", encryptedPassword), eq("email", encryptedEmail)));
+        if (users.size() != 1) {
+            throw new BadRequestException(INVALID_USER_CREDENTIALS);
+        }
 
+        return users.get(0);
+    }
+
+    private void validateUser(User user) {
         if (userRepository.existsByFieldValue("email", user.getEmail())) {
             throw new BadRequestException(USER_DUPLICATED_EMAIL);
         }

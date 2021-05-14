@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.INVALID_METHOD;
+import static api.Method.OPTIONS;
 import static util.Utils.splitQueryList;
 
 public class OrderHandler extends Handler {
@@ -27,13 +28,17 @@ public class OrderHandler extends Handler {
 
     @Override
     protected void execute(HttpExchange exchange) throws Exception {
-        byte[] response = resolveResponse(exchange);
-        OutputStream os = exchange.getResponseBody();
-        os.write(response);
-        os.close();
+        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
+            PreflightResponder.sendPreflightCheckResponse(exchange);
+        } else {
+            byte[] response = resolveRequest(exchange);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
     }
 
-    private byte[] resolveResponse(HttpExchange exchange) throws IOException {
+    private byte[] resolveRequest(HttpExchange exchange) throws IOException {
         byte[] response;
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch(method) {
@@ -57,7 +62,7 @@ public class OrderHandler extends Handler {
     }
 
     private Response<Order> handlePut(HttpExchange exchange) {
-        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+        String user = HeaderDecoder.decryptHeaderUsername(exchange);
         Order updated = orderService.update(readRequestBody(exchange.getRequestBody(), Order.class), user);
         return Response.<Order>builder()
                 .body(updated)
@@ -68,7 +73,7 @@ public class OrderHandler extends Handler {
 
     private Response<?> handleGet(HttpExchange exchange) {
         // TODO add user validation
-        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+        String user = HeaderDecoder.decryptHeaderUsername(exchange);
         Map<String, List<String>> params = splitQueryList(exchange.getRequestURI().getRawQuery());
         List<Order> orders = orderService.get(params);
         return Response.<List<Order>>builder()
@@ -79,7 +84,7 @@ public class OrderHandler extends Handler {
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
-        String user = HeaderDecoder.getBasicAuthUsername(exchange);
+        String user = HeaderDecoder.decryptHeaderUsername(exchange);
         String orderId = orderService.create(readRequestBody(exchange.getRequestBody(), Order.class), user);
         return Response.<String>builder()
                 .body(orderId)

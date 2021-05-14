@@ -12,8 +12,17 @@ import static util.Constants.HEADER_SEPARATOR;
 
 public class HeaderDecoder {
 
-    public static String getBasicAuthUsername(HttpExchange exchange) {
+    public static String decryptHeaderUsername(HttpExchange exchange) {
+        String credentials = getDecodedCredentials(exchange);
+        return credentials.split(HEADER_SEPARATOR)[0];
+    }
 
+    public static String decryptHeaderPassword(HttpExchange exchange) {
+        String credentials = getDecodedCredentials(exchange);
+        return credentials.split(HEADER_SEPARATOR)[1];
+    }
+
+    private static String getDecodedCredentials(HttpExchange exchange) {
         String basicAuthHeader = exchange.getRequestHeaders().get(AUTHORIZATION)
                 .stream()
                 .findFirst()
@@ -21,7 +30,7 @@ public class HeaderDecoder {
 
         String encodedCredentials = basicAuthHeader.split("\\s")[1];
         byte[] decodedCredentials = Base64.decode(encodedCredentials);
-        String credentials = new String(decodedCredentials, StandardCharsets.UTF_8);
-        return credentials.split(HEADER_SEPARATOR)[0];
+        return new String(decodedCredentials, StandardCharsets.UTF_8);
     }
 }
+

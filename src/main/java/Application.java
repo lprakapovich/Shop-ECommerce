@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
 import exception.GlobalExceptionHandler;
 import handler.BookHandler;
+import handler.LoginHandler;
 import handler.OrderHandler;
 import handler.RegistrationHandler;
 import model.order.Order;
@@ -22,9 +23,7 @@ import service.UserService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
@@ -76,7 +75,10 @@ public class Application {
         OrderService orderService = new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService, services);
 
         RegistrationHandler registrationHandler = new RegistrationHandler(mapper, exceptionHandler, userService);
-        server.createContext("/api/users/register", registrationHandler::handle);
+        server.createContext("/api/register", registrationHandler::handle);
+
+        LoginHandler loginHandler = new LoginHandler(mapper, exceptionHandler, userService);
+        server.createContext("/api/login", loginHandler::handle);
 
         BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
         server.createContext("/api/products/books", productHandler::handle);

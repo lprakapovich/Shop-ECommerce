@@ -6,13 +6,17 @@ import api.Response;
 import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
+import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.user.User;
 import service.UserService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 
+import static api.Message.INVALID_REQUEST;
 import static api.Method.OPTIONS;
 
 public class RegistrationHandler extends Handler {
@@ -42,6 +46,8 @@ public class RegistrationHandler extends Handler {
     }
 
     private Response<String> handlePost(HttpExchange exchange) {
+        Object body = readRequestBody(exchange.getRequestBody(), Object.class);
+
         String userId = userService.create(readRequestBody(exchange.getRequestBody(), User.class));
         return Response.<String>builder()
                 .headers(getHeaders())

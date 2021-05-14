@@ -20,12 +20,12 @@ public abstract class Product extends DBObject {
 
     private String name;
     private double price;
-    private int currentDbQuantity;
+    private int availableQuantity;
 
-    public Product(String name, double price, int dbQuantity) {
+    public Product(String name, double price, int quantity) {
         super();
         this.name = name;
         this.price = price;
-        this.currentDbQuantity = dbQuantity;
+        this.availableQuantity = quantity;
     }
 }

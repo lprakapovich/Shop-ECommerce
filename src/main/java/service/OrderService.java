@@ -74,13 +74,13 @@ public class OrderService {
         order.getOrderedItems().forEach(orderedItem -> {
             Product product = orderedItem.getProduct();
             Product fetchedProduct = services.get(product.getClass()).get(product.getId());
-            if (fetchedProduct.getCurrentDbQuantity() == 0) {
+            if (fetchedProduct.getAvailableQuantity() == 0) {
                 throw new BadRequestException(PRODUCT_NOT_AVAILABLE);
-            } else if (fetchedProduct.getCurrentDbQuantity() < orderedItem.getOrderedQuantity()) {
+            } else if (fetchedProduct.getAvailableQuantity() < orderedItem.getOrderedQuantity()) {
                 throw new BadRequestException(INVALID_ORDER_REQUESTED_QUANTITY_EXCEEDS_ACTUAL);
             } else {
                 // set the most recent quantity value from the db for an easier update later on
-                product.setCurrentDbQuantity(fetchedProduct.getCurrentDbQuantity());
+                product.setAvailableQuantity(fetchedProduct.getAvailableQuantity());
             }
         });
     }
@@ -112,7 +112,7 @@ public class OrderService {
     private void updateProductsQuantities(Order order) {
         order.getOrderedItems().forEach(orderedItem -> {
             Product orderedProduct = orderedItem.getProduct();
-            int newQuantity = orderedProduct.getCurrentDbQuantity() - orderedItem.getOrderedQuantity();
+            int newQuantity = orderedProduct.getAvailableQuantity() - orderedItem.getOrderedQuantity();
             services.get(orderedProduct.getClass()).update(orderedProduct.getId(), QUANTITY, newQuantity);
         });
     }
