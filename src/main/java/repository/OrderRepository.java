@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;

@@ -1,5 +1,6 @@
-package api;
+package handler;
 
+import api.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;

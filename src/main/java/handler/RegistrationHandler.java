@@ -1,6 +1,5 @@
 package handler;
 
-import api.Handler;
 import api.PreflightResponder;
 import api.Response;
 import api.StatusCode;
