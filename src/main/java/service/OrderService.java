@@ -52,7 +52,7 @@ public class OrderService {
     }
 
     public List<Order> find(Map<String, List<String>> criteria, String authenticatedUser) {
-       return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
+       return orderRepository.findMany(OrderQueryBuilder.buildQuery(criteria));
     }
 
     public Order update(Order order, String authenticatedUser) {

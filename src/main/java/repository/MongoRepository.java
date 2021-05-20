@@ -37,7 +37,7 @@ public class MongoRepository<T extends DBObject> {
         return collection.find().into(new ArrayList<>());
     }
 
-    public List<T> find(Bson query) {
+    public List<T> findMany(Bson query) {
         return collection.find(query).into(new ArrayList<>());
     }
 
@@ -52,9 +52,6 @@ public class MongoRepository<T extends DBObject> {
     public boolean existsById(ObjectId id) {
         return collection.find(eq(DATABASE_ID, id)).first() != null;
     }
-
-    public boolean existsByFieldValue(String field, String value) {
-        return collection.find(eq(field, value)).first() != null; }
 
     public T update(T t) {
         FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();

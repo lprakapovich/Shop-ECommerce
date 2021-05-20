@@ -2,7 +2,6 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
-import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
 import org.bson.types.ObjectId;
@@ -53,7 +52,7 @@ public class ProductService <T extends Product> {
     }
 
     public List<T> find(Map<String, List<String>> criteria) {
-        List<T> products = productRepository.find(ProductQueryBuilder.buildQuery(criteria));
+        List<T> products = productRepository.findMany(ProductQueryBuilder.buildQuery(criteria));
         if (products.isEmpty()) {
             throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
         }

@@ -26,12 +26,13 @@ public class Constants {
     public static final String HEADER_SEPARATOR = ":";
 
     public static final String EMAIL = "email";
+    public static final String PASSWORD = "password";
     public static final String ID = "id";
     public static final String DATABASE_ID = "_id";
-    public static final String ORDER_IDS = "orderIds";
     public static final String QUANTITY = "quantity";
     public static final String AUTHOR = "author";
     public static final String NAME = "name";
+
 
     public static final int PARAM_ARRAY_SIZE = 2;
 }
