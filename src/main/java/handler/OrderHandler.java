@@ -1,6 +1,9 @@
 package handler;
 
-import api.*;
+import api.HeaderDecoder;
+import api.Method;
+import api.Response;
+import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
@@ -10,12 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import service.OrderService;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
 import static api.Message.INVALID_METHOD;
-import static api.Method.OPTIONS;
 import static util.Utils.*;
 
 public class OrderHandler extends Handler {
@@ -28,18 +29,7 @@ public class OrderHandler extends Handler {
     }
 
     @Override
-    protected void execute(HttpExchange exchange) throws Exception {
-        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
-            PreflightResponder.sendPreflightCheckResponse(exchange);
-        } else {
-            byte[] response = resolveRequest(exchange);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response);
-            os.close();
-        }
-    }
-
-    private byte[] resolveRequest(HttpExchange exchange) throws IOException {
+    protected byte[] resolveRequest(HttpExchange exchange) throws IOException {
         byte[] response;
         Method method = Method.valueOf(exchange.getRequestMethod());
         switch(method) {
@@ -94,7 +84,7 @@ public class OrderHandler extends Handler {
                 .body(containsInPath(path, "cart") ? orderService.getCart(params) :
                         containsInPath(path, "all") ? orderService.getAll(username) :
                         StringUtils.isNotBlank(orderId) ? orderService.get(orderId, username) :
-                                orderService.find(params, username))
+                                orderService.find(params))
                 .headers(getHeaders())
                 .status(StatusCode.OK)
                 .build();

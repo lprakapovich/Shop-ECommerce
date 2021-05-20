@@ -3,14 +3,10 @@ package service;
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
 import model.product.book.Book;
-import util.ProductQueryBuilder;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static api.Message.BOOK_DUPLICATED_TITLE_AND_AUTHOR;
-import static java.util.Collections.singletonList;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 import static util.Constants.AUTHOR;
 import static util.Constants.NAME;
 
@@ -27,11 +23,7 @@ public class BookService extends ProductService<Book> {
     }
 
     private void validateBook(Book book) {
-        Map<String, List<String>> params = new HashMap<>();
-        params.put(NAME, singletonList(book.getName()));
-        params.put(AUTHOR, singletonList(book.getAuthor()));
-
-        if (productRepository.exists(ProductQueryBuilder.buildQuery(params))) {
+        if (productRepository.exists(and(eq(NAME, book.getName()), eq(AUTHOR, book.getAuthor())))) {
             throw new BadRequestException(BOOK_DUPLICATED_TITLE_AND_AUTHOR);
         }
     }

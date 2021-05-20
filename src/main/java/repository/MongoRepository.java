@@ -37,7 +37,7 @@ public class MongoRepository<T extends DBObject> {
         return collection.find().into(new ArrayList<>());
     }
 
-    public List<T> findMany(Bson query) {
+    public List<T> find(Bson query) {
         return collection.find(query).into(new ArrayList<>());
     }
 

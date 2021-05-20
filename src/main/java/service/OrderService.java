@@ -2,6 +2,7 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
+import exception.ResourceNotFoundException;
 import model.order.Order;
 import model.product.Product;
 import org.bson.types.ObjectId;
@@ -51,8 +52,8 @@ public class OrderService {
         return orderRepository.findOne(OrderQueryBuilder.buildQuery(criteria));
     }
 
-    public List<Order> find(Map<String, List<String>> criteria, String authenticatedUser) {
-       return orderRepository.findMany(OrderQueryBuilder.buildQuery(criteria));
+    public List<Order> find(Map<String, List<String>> criteria) {
+       return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
     }
 
     public Order update(Order order, String authenticatedUser) {
@@ -71,6 +72,9 @@ public class OrderService {
 
     private void validateExistingOrder(ObjectId id, String authenticatedUser) {
         Order order = orderRepository.get(id, authenticatedUser);
+        if (order == null) {
+            throw new ResourceNotFoundException(ORDER_NOT_FOUND);
+        }
         validate(order, authenticatedUser);
     }
 

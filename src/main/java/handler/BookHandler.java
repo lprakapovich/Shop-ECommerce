@@ -1,6 +1,8 @@
 package handler;
 
-import api.*;
+import api.Method;
+import api.Response;
+import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
@@ -11,12 +13,10 @@ import org.codehaus.plexus.util.StringUtils;
 import service.BookService;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
 import static api.Message.CANT_RESOLVE_HTTP_METHOD;
-import static api.Method.OPTIONS;
 import static util.Constants.ID;
 import static util.Utils.getIdFromPath;
 import static util.Utils.splitQueryList;
@@ -30,19 +30,7 @@ public class BookHandler extends Handler {
         this.bookService = service;
     }
 
-    @Override
-    protected void execute(HttpExchange exchange) throws Exception {
-        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
-            PreflightResponder.sendPreflightCheckResponse(exchange);
-        } else {
-            byte[] response = resolveRequest(exchange);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response);
-            os.close();
-        }
-    }
-
-    private byte[] resolveRequest(HttpExchange exchange) throws IOException {
+    protected byte[] resolveRequest(HttpExchange exchange) throws IOException {
         return handleBookRequests(exchange, splitQueryList(exchange.getRequestURI().getRawQuery()));
     }
 

@@ -13,8 +13,6 @@ import java.util.Map;
 
 import static api.Message.*;
 
-// TODO rethink if there's really a need to parametrize it
-
 public class ProductService <T extends Product> {
 
     protected final ProductRepository<T> productRepository;
@@ -52,7 +50,7 @@ public class ProductService <T extends Product> {
     }
 
     public List<T> find(Map<String, List<String>> criteria) {
-        List<T> products = productRepository.findMany(ProductQueryBuilder.buildQuery(criteria));
+        List<T> products = productRepository.find(ProductQueryBuilder.buildQuery(criteria));
         if (products.isEmpty()) {
             throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
         }

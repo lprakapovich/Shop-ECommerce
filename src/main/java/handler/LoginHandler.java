@@ -1,6 +1,8 @@
 package handler;
 
-import api.*;
+import api.HeaderDecoder;
+import api.Response;
+import api.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import exception.GlobalExceptionHandler;
@@ -8,9 +10,6 @@ import model.user.User;
 import service.UserService;
 
 import java.io.IOException;
-import java.io.OutputStream;
-
-import static api.Method.OPTIONS;
 
 public class LoginHandler extends Handler {
 
@@ -21,19 +20,7 @@ public class LoginHandler extends Handler {
         this.userService = userService;
     }
 
-    @Override
-    protected void execute(HttpExchange exchange) throws Exception {
-        if (exchange.getRequestMethod().equalsIgnoreCase(OPTIONS.getName())) {
-            PreflightResponder.sendPreflightCheckResponse(exchange);
-        } else {
-            byte[] response = resolveRequest(exchange);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response);
-            os.close();
-        }
-    }
-
-    private byte[] resolveRequest(HttpExchange exchange) throws IOException {
+    protected byte[] resolveRequest(HttpExchange exchange) throws IOException {
         Response<User> loginResponse = handleLogin(exchange);
         return getResponseBodyAsBytes(loginResponse, exchange);
     }
