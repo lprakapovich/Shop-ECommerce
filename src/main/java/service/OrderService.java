@@ -2,19 +2,19 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
-import exception.ResourceNotFoundException;
 import model.order.Order;
 import model.product.Product;
 import org.bson.types.ObjectId;
 import repository.OrderRepository;
 import util.OrderQueryBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 import static api.Message.*;
-import static model.order.OrderState.Cart;
-import static model.order.OrderState.Processed;
+import static model.order.Status.Cart;
+import static model.order.Status.Processed;
 import static util.Constants.QUANTITY;
 
 public class OrderService {
@@ -30,33 +30,47 @@ public class OrderService {
     }
 
     public String create(Order order, String authenticatedUser) {
-        order.setOrderState(Cart);
+        order.setStatus(Cart);
+        order.setDate(LocalDate.now());
+        order.setLastModifiedDate(LocalDate.now());
         validateNewOrder(order, authenticatedUser);
-        String orderId = orderRepository.create(order);
-        userService.updateUserOrderList(authenticatedUser, orderId);
-        return orderId;
+        return orderRepository.create(order);
     }
 
-    public List<Order> get(Map<String, List<String>> criteria) {
-        return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
+    public Order get(String id, String authenticatedUser) {
+        return isAdmin(authenticatedUser)
+                ? orderRepository.get(new ObjectId(id))
+                : orderRepository.get(new ObjectId(id), authenticatedUser);
     }
 
-    public Order get(ObjectId id, String authenticatedUser) {
-        return orderRepository.get(id, authenticatedUser)
-                .orElseThrow(() -> new ResourceNotFoundException(ORDER_NOT_FOUND));
+    public List<Order> getAll(String authenticatedUser) {
+        return isAdmin(authenticatedUser) ? orderRepository.getAll() : orderRepository.get(authenticatedUser);
+    }
+
+    public Order getCart(Map<String, List<String>> criteria) {
+        return orderRepository.findOne(OrderQueryBuilder.buildQuery(criteria));
+    }
+
+    public List<Order> find(Map<String, List<String>> criteria, String authenticatedUser) {
+       return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
     }
 
     public Order update(Order order, String authenticatedUser) {
         validateExistingOrder(order.getId(), authenticatedUser);
-        if (order.getOrderState().equals(Processed)) {
+        if (order.getStatus().equals(Processed)) {
             updateProductsQuantities(order);
         }
+        order.setLastModifiedDate(LocalDate.now());
         return orderRepository.update(order);
     }
 
+    public void delete(String id, String authenticatedUser) {
+        validateExistingOrder(new ObjectId(id), authenticatedUser);
+        orderRepository.delete(id);
+    }
+
     private void validateExistingOrder(ObjectId id, String authenticatedUser) {
-        Order order = orderRepository.get(id, authenticatedUser)
-                .orElseThrow(() -> new ResourceNotFoundException(""));
+        Order order = orderRepository.get(id, authenticatedUser);
         validate(order, authenticatedUser);
     }
 
@@ -116,4 +130,9 @@ public class OrderService {
             services.get(orderedProduct.getClass()).update(orderedProduct.getId(), QUANTITY, newQuantity);
         });
     }
+
+    private boolean isAdmin(String authenticatedUser) {
+        return userService.isAdmin(authenticatedUser);
+    }
 }
+

@@ -9,7 +9,6 @@ import model.product.book.Book;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import service.BookService;
-import util.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -64,7 +63,7 @@ public class BookHandler extends Handler {
                 response = getResponseBodyAsBytes(put, exchange);
                 break;
             case DELETE:
-                Response<Object> delete = handleDelete(params);
+                Response delete = handleDelete(params);
                 response = getResponseBodyAsBytes(delete, exchange);
                 break;
             default:
@@ -102,7 +101,8 @@ public class BookHandler extends Handler {
                 .build();
     }
 
-    private Response<Object> handleDelete(Map<String, List<String>> params) {
+    // TODO refactor
+    private Response handleDelete(Map<String, List<String>> params) {
         String id = params.get(ID).get(0);
         bookService.delete(id);
         return Response.builder()

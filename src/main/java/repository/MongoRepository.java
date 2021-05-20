@@ -7,20 +7,15 @@ import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Updates;
 import lombok.AllArgsConstructor;
 import model.DBObject;
-import model.product.Product;
-import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.in;
 import static util.Constants.DATABASE_ID;
 
-// TODO refactor getting by id (wither string or ObjectId)
 @AllArgsConstructor
 public class MongoRepository<T extends DBObject> {
 
@@ -34,23 +29,20 @@ public class MongoRepository<T extends DBObject> {
         return collection.findOneAndDelete(eq(DATABASE_ID, new ObjectId(id)));
     }
 
-    public List<T> get(ObjectId id) { return collection.find(eq(DATABASE_ID, id)).into(new ArrayList<>()); }
-
-    public List<T> get(String id) {
-       return collection.find(eq(DATABASE_ID, new ObjectId(id))).into(new ArrayList<>());
+    public T get(ObjectId id) {
+        return collection.find(eq(DATABASE_ID, id)).first();
     }
 
-    public List<T> get(List<String> ids) {
-        return collection.find(in(DATABASE_ID, ids)).into(new ArrayList<>());
+    public List<T> getAll() {
+        return collection.find().into(new ArrayList<>());
     }
 
-    public List<T> find(Bson query) { return collection.find(query).into(new ArrayList<>()); }
+    public List<T> find(Bson query) {
+        return collection.find(query).into(new ArrayList<>());
+    }
 
-    public T update(T t) {
-        FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
-        options.returnDocument(ReturnDocument.AFTER);
-        options.upsert(true);
-        return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t, options);
+    public T findOne(Bson query) {
+        return collection.find(query).first();
     }
 
     public boolean exists(Bson query) {
@@ -62,7 +54,13 @@ public class MongoRepository<T extends DBObject> {
     }
 
     public boolean existsByFieldValue(String field, String value) {
-        return collection.find(eq(field, value)).first() != null;
+        return collection.find(eq(field, value)).first() != null; }
+
+    public T update(T t) {
+        FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
+        options.returnDocument(ReturnDocument.AFTER);
+        options.upsert(true);
+        return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t, options);
     }
 
     public T update(ObjectId id, String field, Object value) {

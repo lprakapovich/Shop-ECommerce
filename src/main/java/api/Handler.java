@@ -57,7 +57,7 @@ public abstract class Handler {
     protected static Headers getHeaders() {
         Headers headers = new Headers();
         headers.set(ALLOW_ORIGIN, ALL);
-        headers.set(ALLOW_HEADERS, HEADERS);
+        headers.set(ALLOW_HEADERS, ALLOWED_HEADERS);
         headers.set(ALLOW_METHODS, "GET, HEAD, OPTIONS, POST, PUT");
         headers.set(CONTENT_TYPE, APPLICATION_JSON);
         return headers;
@@ -67,9 +67,5 @@ public abstract class Handler {
             exchange.getResponseHeaders().putAll(response.getHeaders());
             exchange.sendResponseHeaders(response.getStatus().getCode(), 0);
             return writeResponse(response.getBody());
-    }
-
-    // TODO filter this data
-    protected void sendPreflightCheckResponse(HttpExchange exchange) throws IOException {
     }
 }

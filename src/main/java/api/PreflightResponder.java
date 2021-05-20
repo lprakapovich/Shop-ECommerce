@@ -10,8 +10,8 @@ import static util.Constants.*;
 public class PreflightResponder {
     public static void sendPreflightCheckResponse(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().add(ALLOW_ORIGIN, ALL);
-        exchange.getResponseHeaders().add(ALLOW_METHODS, "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add(ALLOW_HEADERS, HEADERS);
+        exchange.getResponseHeaders().add(ALLOW_METHODS, ALLOWED_METHODS);
+        exchange.getResponseHeaders().add(ALLOW_HEADERS, ALLOWED_HEADERS);
         exchange.sendResponseHeaders(HttpStatus.SC_ACCEPTED, -1);
     }
 }

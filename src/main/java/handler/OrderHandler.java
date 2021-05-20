@@ -6,6 +6,8 @@ import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
 import exception.GlobalExceptionHandler;
 import model.order.Order;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import service.OrderService;
 
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 import static api.Message.INVALID_METHOD;
 import static api.Method.OPTIONS;
-import static util.Utils.splitQueryList;
+import static util.Utils.*;
 
 public class OrderHandler extends Handler {
 
@@ -54,16 +56,29 @@ public class OrderHandler extends Handler {
                 Response<Order> put = handlePut(exchange);
                 response = getResponseBodyAsBytes(put, exchange);
                 break;
+            case DELETE:
+                Response delete = handleDelete(exchange);
+                response = getResponseBodyAsBytes(delete, exchange);
+                break;
             default:
                 throw new BadRequestException(INVALID_METHOD);
         }
-
         return response;
     }
 
+    private Response handleDelete(HttpExchange exchange) {
+        String orderId = getIdFromPath(exchange.getRequestURI().getRawPath());
+        String username = HeaderDecoder.decryptHeaderUsername(exchange);
+        orderService.delete(orderId, username);
+        return Response.builder()
+                .headers(getHeaders())
+                .status(StatusCode.NO_CONTENT)
+                .build();
+    }
+
     private Response<Order> handlePut(HttpExchange exchange) {
-        String user = HeaderDecoder.decryptHeaderUsername(exchange);
-        Order updated = orderService.update(readRequestBody(exchange.getRequestBody(), Order.class), user);
+        String username = HeaderDecoder.decryptHeaderUsername(exchange);
+        Order updated = orderService.update(readRequestBody(exchange.getRequestBody(), Order.class), username);
         return Response.<Order>builder()
                 .body(updated)
                 .headers(getHeaders())
@@ -72,12 +87,15 @@ public class OrderHandler extends Handler {
     }
 
     private Response<?> handleGet(HttpExchange exchange) {
-        // TODO add user validation
-        String user = HeaderDecoder.decryptHeaderUsername(exchange);
+        String path = exchange.getRequestURI().getRawPath();
+        String orderId = getIdFromPath(path);
+        String username = HeaderDecoder.decryptHeaderUsername(exchange);
         Map<String, List<String>> params = splitQueryList(exchange.getRequestURI().getRawQuery());
-        List<Order> orders = orderService.get(params);
-        return Response.<List<Order>>builder()
-                .body(orders)
+        return Response.builder()
+                .body(containsInPath(path, "cart") ? orderService.getCart(params) :
+                        containsInPath(path, "all") ? orderService.getAll(username) :
+                        StringUtils.isNotBlank(orderId) ? orderService.get(orderId, username) :
+                                orderService.find(params, username))
                 .headers(getHeaders())
                 .status(StatusCode.OK)
                 .build();

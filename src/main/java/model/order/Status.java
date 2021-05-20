@@ -1,6 +1,6 @@
 package model.order;
 
-public enum OrderState {
+public enum Status {
     Cart,
     Processed,
     Shipped,
