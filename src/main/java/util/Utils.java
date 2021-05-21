@@ -24,7 +24,7 @@ public class Utils {
         }
         return Pattern.compile(URI_PARAM_SEPARATOR)
                 .splitAsStream(query)
-                .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
+                .map(s -> Arrays.copyOf(s.split(EQUALS), 2))
                 .collect(groupingBy(s -> decode(s[0]),
                         mapping(s -> decode(s[1]), toList())));
     }
@@ -35,7 +35,7 @@ public class Utils {
         }
         return Pattern.compile(URI_PARAM_SEPARATOR)
                 .splitAsStream(query)
-                .map(s -> Arrays.copyOf(s.split(EQUALS), PARAM_ARRAY_SIZE))
+                .map(s -> Arrays.copyOf(s.split(EQUALS), 2))
                 .collect(Collectors.toMap(p -> decode(p[0]), p -> decode(p[1])));
     }
 

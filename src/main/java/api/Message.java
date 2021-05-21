@@ -2,6 +2,7 @@ package api;
 
 public class Message {
 
+    // TODO rearrange
     private Message() {}
 
     public static final String ITEM_NOT_FOUND = "Item not found";

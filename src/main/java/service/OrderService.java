@@ -16,7 +16,7 @@ import java.util.Map;
 import static api.Message.*;
 import static model.order.Status.Cart;
 import static model.order.Status.Processed;
-import static util.Constants.QUANTITY;
+import static util.Constants.AVAILABLE_QUANTITY;
 
 public class OrderService {
 
@@ -131,7 +131,7 @@ public class OrderService {
         order.getOrderedItems().forEach(orderedItem -> {
             Product orderedProduct = orderedItem.getProduct();
             int newQuantity = orderedProduct.getAvailableQuantity() - orderedItem.getOrderedQuantity();
-            services.get(orderedProduct.getClass()).update(orderedProduct.getId(), QUANTITY, newQuantity);
+            services.get(orderedProduct.getClass()).update(orderedProduct.getId(), AVAILABLE_QUANTITY, newQuantity);
         });
     }
 
