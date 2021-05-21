@@ -1,10 +1,7 @@
 package repository;
 
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import lombok.AllArgsConstructor;
 import model.DBObject;
 import org.bson.conversions.Bson;
@@ -65,5 +62,12 @@ public class MongoRepository<T extends DBObject> {
         options.returnDocument(ReturnDocument.AFTER);
         options.upsert(true);
         return collection.findOneAndUpdate(eq(DATABASE_ID, id), Updates.set(field, value), options);
+    }
+
+    public void findAndUpdate(Bson query, String field, Object value) {
+        UpdateOptions options = new UpdateOptions();
+        options.bypassDocumentValidation(true);
+        options.upsert(true);
+        collection.updateMany(query, Updates.set(field, value), options);
     }
 }

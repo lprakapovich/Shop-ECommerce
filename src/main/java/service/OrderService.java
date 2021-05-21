@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 import static model.order.Status.Cart;
 import static model.order.Status.Processed;
 import static util.Constants.AVAILABLE_QUANTITY;
@@ -34,7 +36,7 @@ public class OrderService {
         order.setStatus(Cart);
         order.setDate(LocalDate.now());
         order.setLastModifiedDate(LocalDate.now());
-        validateNewOrder(order, authenticatedUser);
+        validateOrderToCreate(order, authenticatedUser);
         return orderRepository.create(order);
     }
 
@@ -57,20 +59,24 @@ public class OrderService {
     }
 
     public Order update(Order order, String authenticatedUser) {
-        validateExistingOrder(order.getId(), authenticatedUser);
+        validateOrderToUpdate(order.getId(), authenticatedUser);
         if (order.getStatus().equals(Processed)) {
-            updateProductsQuantities(order);
+            updateProductAvailability(order);
         }
         order.setLastModifiedDate(LocalDate.now());
         return orderRepository.update(order);
     }
 
     public void delete(String id, String authenticatedUser) {
-        validateExistingOrder(new ObjectId(id), authenticatedUser);
+        validateOrderToDelete(new ObjectId(id), authenticatedUser);
         orderRepository.delete(id);
     }
 
-    private void validateExistingOrder(ObjectId id, String authenticatedUser) {
+    private void validateOrderToCreate(Order order, String authenticatedUser) {
+        validate(order, authenticatedUser);
+    }
+
+    private void validateOrderToUpdate(ObjectId id, String authenticatedUser) {
         Order order = orderRepository.get(id, authenticatedUser);
         if (order == null) {
             throw new ResourceNotFoundException(ORDER_NOT_FOUND);
@@ -78,8 +84,13 @@ public class OrderService {
         validate(order, authenticatedUser);
     }
 
-    private void validateNewOrder(Order order, String authenticatedUser) {
-        validate(order, authenticatedUser);
+    private void validateOrderToDelete(ObjectId id, String authenticatedUser) {
+        Order order = orderRepository.get(id, authenticatedUser);
+        if (order == null) {
+            throw new ResourceNotFoundException(ORDER_NOT_FOUND);
+        }
+        checkIssuer(order, authenticatedUser);
+        checkOrderDetails(order);
     }
 
     private void validate(Order order, String authenticatedUser) {
@@ -88,6 +99,7 @@ public class OrderService {
         checkOrderedItems(order);
     }
 
+    // check if the product of actually available
     private void checkOrderedItems(Order order) {
         order.getOrderedItems().forEach(orderedItem -> {
             Product product = orderedItem.getProduct();
@@ -127,16 +139,25 @@ public class OrderService {
         return order.getOrderedItems().isEmpty();
     }
 
-    private void updateProductsQuantities(Order order) {
+    private void updateProductAvailability(Order order) {
         order.getOrderedItems().forEach(orderedItem -> {
             Product orderedProduct = orderedItem.getProduct();
             int newQuantity = orderedProduct.getAvailableQuantity() - orderedItem.getOrderedQuantity();
-            services.get(orderedProduct.getClass()).update(orderedProduct.getId(), AVAILABLE_QUANTITY, newQuantity);
+            updateAvailableQuantityInProductCollection(orderedProduct, newQuantity);
+            updateAvailableQuantityInOrderCollection(orderedProduct.getId(), newQuantity);
         });
+    }
+
+    private void updateAvailableQuantityInOrderCollection(ObjectId productId, int newQuantity) {
+        orderRepository.findAndUpdate((and(eq("orderedItems.product._id", productId), eq("status", "Cart"))),
+                "orderedItems.$.product.availableQuantity", newQuantity);
+    }
+
+    private void updateAvailableQuantityInProductCollection(Product orderedProduct, int newQuantity) {
+        services.get(orderedProduct.getClass()).updateField(orderedProduct.getId(), AVAILABLE_QUANTITY, newQuantity);
     }
 
     private boolean isAdmin(String authenticatedUser) {
         return userService.isAdmin(authenticatedUser);
     }
 }
-

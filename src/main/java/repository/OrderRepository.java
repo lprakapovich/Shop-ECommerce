@@ -7,8 +7,7 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 import static util.Constants.DATABASE_ID;
 import static util.Constants.ISSUER_EMAIL;
 

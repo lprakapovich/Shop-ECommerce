@@ -45,7 +45,7 @@ public class ProductService <T extends Product> {
         return updated;
     }
 
-    public T update(ObjectId id, String field, Object value) {
+    public T updateField(ObjectId id, String field, Object value) {
         return productRepository.update(id, field, value);
     }
 
