@@ -3,8 +3,10 @@ package service;
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
 import exception.ResourceNotFoundException;
+import model.order.Order;
 import model.product.Product;
 import org.bson.types.ObjectId;
+import repository.OrderRepository;
 import repository.ProductRepository;
 import util.ProductQueryBuilder;
 
@@ -16,9 +18,11 @@ import static api.Message.*;
 public class ProductService <T extends Product> {
 
     protected final ProductRepository<T> productRepository;
+    protected final OrderRepository orderRepository;
 
-    public ProductService(MongoCollection<T> collection) {
+    public ProductService(MongoCollection<T> collection, MongoCollection<Order> orderCollection) {
         this.productRepository = new ProductRepository<>(collection);
+        this.orderRepository = new OrderRepository(orderCollection);
     }
 
     public String create(T t) {
@@ -42,11 +46,15 @@ public class ProductService <T extends Product> {
         if (updated == null) {
             throw new BadRequestException(ITEM_NOT_FOUND);
         }
+
+        orderRepository.updateProductQuantitiesInCart(t.getId(), t.getAvailableQuantity());
+        orderRepository.updateCartOrderedQuantityIfExceeds(t.getId(), t.getAvailableQuantity());
+
         return updated;
     }
 
     public T updateField(ObjectId id, String field, Object value) {
-        return productRepository.update(id, field, value);
+        return productRepository.findOneAndUpdate(id, field, value);
     }
 
     public List<T> find(Map<String, List<String>> criteria) {

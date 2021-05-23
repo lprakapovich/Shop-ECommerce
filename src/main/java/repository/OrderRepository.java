@@ -24,4 +24,24 @@ public class OrderRepository extends MongoRepository<Order> {
     public List<Order> get(String issuer) {
         return collection.find(eq(ISSUER_EMAIL, issuer)).into(new ArrayList<>());
     }
+
+    public void updateProductQuantitiesInCart(ObjectId productId, int availableQuantity) {
+        super.findManyAndUpdate((and(
+                eq("orderedItems.product._id", productId),
+                eq("status", "Cart"))),
+                "orderedItems.$.product.availableQuantity", availableQuantity);
+    }
+
+    public void updateCartOrderedQuantityIfExceeds(ObjectId productId, int availableQuantity) {
+            super.findManyAndUpdate((and(
+                    eq("orderedItems.product._id", productId),
+                    eq("status", "Cart"),
+                    gt("orderedItems.orderedQuantity", availableQuantity))),
+                    "orderedItems.$.orderedQuantity", availableQuantity);
+    }
+
+    public void deleteProductFromCart(ObjectId productId) {
+        super.findManyAndDelete(and(eq("orderedItems.product._id", productId), eq("status", "Cart")));
+    }
 }
+

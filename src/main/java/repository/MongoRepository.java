@@ -57,17 +57,18 @@ public class MongoRepository<T extends DBObject> {
         return collection.findOneAndReplace(eq(DATABASE_ID, t.getId()), t, options);
     }
 
-    public T update(ObjectId id, String field, Object value) {
+    public T findOneAndUpdate(ObjectId id, String field, Object value) {
         FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
         options.returnDocument(ReturnDocument.AFTER);
         options.upsert(true);
         return collection.findOneAndUpdate(eq(DATABASE_ID, id), Updates.set(field, value), options);
     }
 
-    public void findAndUpdate(Bson query, String field, Object value) {
-        UpdateOptions options = new UpdateOptions();
-        options.bypassDocumentValidation(true);
-        options.upsert(true);
-        collection.updateMany(query, Updates.set(field, value), options);
+    public void findManyAndUpdate(Bson query, String field, Object value) {
+        collection.updateMany(query, Updates.set(field, value));
+    }
+
+    public void findManyAndDelete(Bson query) {
+        collection.deleteMany(query);
     }
 }

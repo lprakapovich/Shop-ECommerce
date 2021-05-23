@@ -3,6 +3,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
 import exception.GlobalExceptionHandler;
@@ -64,12 +65,16 @@ public class Application {
         ObjectMapper mapper = Configuration.getObjectMapper();
         GlobalExceptionHandler exceptionHandler = Configuration.getExceptionHandler();
 
-        UserService userService = new UserService(database.getCollection(USERS_COLLECTION, User.class));
-        BookService bookService = new BookService(database.getCollection(BOOKS_COLLECTION, Book.class));
+        MongoCollection<Order> orderCollection = database.getCollection(ORDERS_COLLECTION, Order.class);
+        MongoCollection<User> userCollection = database.getCollection(USERS_COLLECTION, User.class);
+        MongoCollection<Book> bookCollection = database.getCollection(BOOKS_COLLECTION, Book.class);
 
-        Map<Class<? extends Product>, ProductService> services = new HashMap<>();
-        services.put(Book.class, bookService);
-        OrderService orderService = new OrderService(database.getCollection(ORDERS_COLLECTION, Order.class), userService, services);
+        UserService userService = new UserService(userCollection);
+        BookService bookService = new BookService(bookCollection, orderCollection);
+
+        Map<Class<? extends Product>, ProductService> productServices = new HashMap<>();
+        productServices.put(Book.class, bookService);
+        OrderService orderService = new OrderService(orderCollection, userService, productServices);
 
         RegistrationHandler registrationHandler = new RegistrationHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/register", registrationHandler::handle);
