@@ -4,7 +4,6 @@ import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
 import exception.ResourceNotFoundException;
 import model.order.Order;
-import model.order.OrderedItem;
 import model.product.Product;
 import org.bson.types.ObjectId;
 import repository.OrderRepository;
@@ -13,11 +12,8 @@ import util.OrderQueryBuilder;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static api.Message.*;
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
 import static model.order.Status.Cart;
 import static model.order.Status.Processed;
 import static util.Constants.AVAILABLE_QUANTITY;
@@ -57,7 +53,7 @@ public class OrderService {
     }
 
     public List<Order> find(Map<String, List<String>> criteria) {
-       return orderRepository.find(OrderQueryBuilder.buildQuery(criteria));
+       return orderRepository.findMany(OrderQueryBuilder.buildQuery(criteria));
     }
 
     public Order update(Order order, String authenticatedUser) {
@@ -155,19 +151,26 @@ public class OrderService {
     }
 
     private void deleteUnavailableProductFromCart(ObjectId productId) {
-        List<Order> orders = orderRepository.find(and(eq("orderedItems.product._id", productId), eq("status", "Cart")));
+        List<Order> orders = orderRepository.getByProductIdAndCart(productId);
         for (Order order : orders) {
             order.getOrderedItems().stream()
                     .filter(i -> i.getProduct().getId().equals(productId))
                     .findFirst()
-                    .ifPresent(orderedItem -> order.getOrderedItems().remove(orderedItem));
-            orderRepository.update(order);
+                    .ifPresent(orderedItem -> {
+                        order.getOrderedItems().remove(orderedItem);
+                    });
+
+            if (order.getOrderedItems().isEmpty()) {
+                orderRepository.delete(order.getId());
+            } else {
+                orderRepository.update(order);
+            }
         }
     }
 
     private void updateAvailableQuantityInOrderCollection(ObjectId productId, int newQuantity) {
-        orderRepository.updateProductQuantitiesInCart(productId, newQuantity);
-        orderRepository.updateCartOrderedQuantityIfExceeds(productId, newQuantity);
+        orderRepository.updateProductQuantityInCarts(productId, newQuantity);
+        orderRepository.updateOrderedQuantityIfExceedsAvailable(productId, newQuantity);
     }
 
     private void updateAvailableQuantityInProductCollection(Product orderedProduct, int newQuantity) {

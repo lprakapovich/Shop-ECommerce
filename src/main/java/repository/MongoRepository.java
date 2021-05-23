@@ -22,6 +22,10 @@ public class MongoRepository<T extends DBObject> {
         return collection.insertOne(t).getInsertedId().asObjectId().getValue().toString();
     }
 
+    public void delete(ObjectId id) {
+        collection.deleteOne(eq(DATABASE_ID, id));
+    }
+
     public T delete(String id) {
         return collection.findOneAndDelete(eq(DATABASE_ID, new ObjectId(id)));
     }
@@ -34,20 +38,12 @@ public class MongoRepository<T extends DBObject> {
         return collection.find().into(new ArrayList<>());
     }
 
-    public List<T> find(Bson query) {
+    public List<T> findMany(Bson query) {
         return collection.find(query).into(new ArrayList<>());
     }
 
     public T findOne(Bson query) {
         return collection.find(query).first();
-    }
-
-    public boolean exists(Bson query) {
-        return collection.find(query).first() != null;
-    }
-
-    public boolean existsById(ObjectId id) {
-        return collection.find(eq(DATABASE_ID, id)).first() != null;
     }
 
     public T update(T t) {
@@ -68,7 +64,11 @@ public class MongoRepository<T extends DBObject> {
         collection.updateMany(query, Updates.set(field, value));
     }
 
-    public void findManyAndDelete(Bson query) {
-        collection.deleteMany(query);
+    public boolean exists(Bson query) {
+        return collection.find(query).first() != null;
+    }
+
+    public boolean existsById(ObjectId id) {
+        return collection.find(eq(DATABASE_ID, id)).first() != null;
     }
 }

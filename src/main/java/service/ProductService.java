@@ -47,9 +47,8 @@ public class ProductService <T extends Product> {
             throw new BadRequestException(ITEM_NOT_FOUND);
         }
 
-        orderRepository.updateProductQuantitiesInCart(t.getId(), t.getAvailableQuantity());
-        orderRepository.updateCartOrderedQuantityIfExceeds(t.getId(), t.getAvailableQuantity());
-
+        orderRepository.updateProductInCarts(t);
+        orderRepository.updateOrderedQuantityIfExceedsAvailable(t.getId(), t.getAvailableQuantity());
         return updated;
     }
 
@@ -58,7 +57,7 @@ public class ProductService <T extends Product> {
     }
 
     public List<T> find(Map<String, List<String>> criteria) {
-        List<T> products = productRepository.find(ProductQueryBuilder.buildQuery(criteria));
+        List<T> products = productRepository.findMany(ProductQueryBuilder.buildQuery(criteria));
         if (products.isEmpty()) {
             throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND);
         }

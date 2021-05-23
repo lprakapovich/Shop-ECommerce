@@ -2,6 +2,7 @@ package repository;
 
 import com.mongodb.client.MongoCollection;
 import model.order.Order;
+import model.product.Product;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
@@ -25,23 +26,31 @@ public class OrderRepository extends MongoRepository<Order> {
         return collection.find(eq(ISSUER_EMAIL, issuer)).into(new ArrayList<>());
     }
 
-    public void updateProductQuantitiesInCart(ObjectId productId, int availableQuantity) {
+    public List<Order> getByProductIdAndCart(ObjectId productId) {
+        return super.findMany(and(
+                eq("orderedItems.product._id", productId),
+                eq("status", "Cart")));
+    }
+
+    public void updateProductInCarts(Product product) {
+        super.findManyAndUpdate((and(
+                eq("orderedItems.product._id", product.getId()),
+                eq("status", "Cart"))), "orderedItems.$.product", product);
+    }
+
+    public void updateProductQuantityInCarts(ObjectId productId, int availableQuantity) {
         super.findManyAndUpdate((and(
                 eq("orderedItems.product._id", productId),
                 eq("status", "Cart"))),
                 "orderedItems.$.product.availableQuantity", availableQuantity);
     }
 
-    public void updateCartOrderedQuantityIfExceeds(ObjectId productId, int availableQuantity) {
+    public void updateOrderedQuantityIfExceedsAvailable(ObjectId productId, int availableQuantity) {
             super.findManyAndUpdate((and(
                     eq("orderedItems.product._id", productId),
                     eq("status", "Cart"),
                     gt("orderedItems.orderedQuantity", availableQuantity))),
                     "orderedItems.$.orderedQuantity", availableQuantity);
-    }
-
-    public void deleteProductFromCart(ObjectId productId) {
-        super.findManyAndDelete(and(eq("orderedItems.product._id", productId), eq("status", "Cart")));
     }
 }
 
