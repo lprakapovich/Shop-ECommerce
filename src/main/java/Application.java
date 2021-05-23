@@ -77,6 +77,9 @@ public class Application {
         LoginHandler loginHandler = new LoginHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/login", loginHandler::handle);
 
+        UserHandler userHandler = new UserHandler(mapper, exceptionHandler, userService);
+        server.createContext("/api/users", userHandler::handle);
+
         BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
         server.createContext("/api/products/books", productHandler::handle);
 

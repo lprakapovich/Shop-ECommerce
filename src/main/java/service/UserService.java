@@ -4,13 +4,13 @@ import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
 import model.user.Role;
 import model.user.User;
+import org.bson.types.ObjectId;
 import repository.UserRepository;
 
 import static api.Message.*;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static util.Constants.EMAIL;
-import static util.Constants.PASSWORD;
+import static util.Constants.*;
 
 public class UserService {
 
@@ -33,12 +33,31 @@ public class UserService {
         return user;
     }
 
-    public boolean isAdmin(String email) {
-        User user = userRepository.findOne(eq(EMAIL, email));
+    public boolean isAdmin(String authenticatedUser) {
+        User user = userRepository.findOne(eq(EMAIL, authenticatedUser));
         if (user == null) {
             throw new BadRequestException(USER_NOT_FOUND);
         }
         return user.getRole().equals(Role.Admin);
+    }
+
+    public User get(String userId, String authenticatedUser) {
+        User user = userRepository.get(new ObjectId(userId));
+        if (!user.getEmail().equals(authenticatedUser)) {
+            throw new BadRequestException(USERNAME_MISMATCH);
+        }
+        return user;
+    }
+
+    public User update(User userToUpdate, String authenticatedUser) {
+        User user = userRepository.findOne(eq(DATABASE_ID, userToUpdate.getId()));
+        if (user == null) {
+            throw new BadRequestException(USER_NOT_FOUND);
+        }
+        if (!userToUpdate.getEmail().equals(authenticatedUser)) {
+            throw new BadRequestException(USERNAME_MISMATCH);
+        }
+        return userRepository.update(userToUpdate);
     }
 
     private void validateUser(User user) {
