@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Filter;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
 import static com.mongodb.client.model.Updates.combine;
-import static util.OrderQueryBuilder.QueryParam.Id;
-import static util.OrderQueryBuilder.QueryParam.Status;
+import static util.OrderQueryBuilder.QueryParam.*;
 
 public class OrderQueryBuilder {
 
@@ -36,11 +37,11 @@ public class OrderQueryBuilder {
         return combine(filters);
     }
 
-
     @AllArgsConstructor
     enum QueryParam {
         Id("id", "_id", IdApplier),
-        Status("status", "status", StatusApplier);
+        Status("status", "status", StatusApplier),
+        Issuer("issuer", "issuer.email", IssuerApplier);
 
         private final String paramName;
         private final String fieldName;
@@ -53,5 +54,9 @@ public class OrderQueryBuilder {
 
     public static final FilterApplier StatusApplier = (params) -> {
         filters.add(in(Status.fieldName, params.get(Status.paramName)));
+    };
+
+    public static final FilterApplier IssuerApplier = (params) -> {
+        filters.add(eq(Issuer.fieldName, params.get(Issuer.paramName).get(0)));
     };
 }

@@ -2,7 +2,6 @@ package service;
 
 import com.mongodb.client.MongoCollection;
 import exception.BadRequestException;
-import exception.NonUniqueQueryResultException;
 import exception.ResourceNotFoundException;
 import model.product.Product;
 import org.bson.types.ObjectId;
@@ -13,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import static api.Message.*;
-
-// TODO rethink if there's really a need to parametrize it
 
 public class ProductService <T extends Product> {
 
@@ -30,9 +27,7 @@ public class ProductService <T extends Product> {
     }
 
     public T get(ObjectId id) {
-        List<T> items = productRepository.get(id);
-        validateSingletonList(items);
-        return items.get(0);
+        return productRepository.get(id);
     }
 
     public void delete(String id) {
@@ -50,7 +45,7 @@ public class ProductService <T extends Product> {
         return updated;
     }
 
-    public T update(ObjectId id, String field, Object value) {
+    public T updateField(ObjectId id, String field, Object value) {
         return productRepository.update(id, field, value);
     }
 
@@ -69,14 +64,6 @@ public class ProductService <T extends Product> {
     private void validateProduct(T t) {
         if (t.getAvailableQuantity() < 0 || t.getPrice() <= 0) {
             throw new BadRequestException(INVALID_PRODUCT);
-        }
-    }
-
-    private void validateSingletonList(List<?> items) {
-        if (items.isEmpty()) {
-            throw new ResourceNotFoundException(ITEM_NOT_FOUND);
-        } else if (items.size() > 1) {
-            throw new NonUniqueQueryResultException(NON_UNIQUE_RESULT);
         }
     }
 }

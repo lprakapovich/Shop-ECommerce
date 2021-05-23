@@ -2,6 +2,7 @@ package api;
 
 public class Message {
 
+    // TODO rearrange
     private Message() {}
 
     public static final String ITEM_NOT_FOUND = "Item not found";
@@ -27,6 +28,7 @@ public class Message {
     public static final String INVALID_ORDER_REQUESTED_QUANTITY_EXCEEDS_ACTUAL = "Requested product quantity exceeds the one available at the stock";
     public static final String INVALID_METHOD = "Invalid method name (must be POST, PUT, GET, or DELETE";
     public static final String INVALID_REQUEST = "Invalid http request";
+    public static final String INVALID_URL = "Invalid URL";
     public static final String INVALID_USER_CREDENTIALS = "Invalid user credentials";
     public static final String USERNAME_MISMATCH = "Username doesn't match the one from authentication header";
 }

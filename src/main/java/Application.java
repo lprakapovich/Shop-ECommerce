@@ -6,10 +6,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.sun.net.httpserver.HttpServer;
 import exception.GlobalExceptionHandler;
-import handler.BookHandler;
-import handler.LoginHandler;
-import handler.OrderHandler;
-import handler.RegistrationHandler;
+import handler.*;
 import model.order.Order;
 import model.product.Product;
 import model.product.book.Book;
@@ -44,7 +41,7 @@ public class Application {
         ConnectionString connectionString = new ConnectionString("mongodb://localhost");
 
         // direct serialization of POJOs to and from BSON
-        // Book.class is registered explicitly because codes is not found otherwise
+        // Book.class is registered explicitly because codes are not found otherwise
         CodecRegistry pojoCodecRegistry = fromProviders(
                 PojoCodecProvider.builder().register(model.product.book.Book.class, model.product.Product.class).automatic(true).build());
 
@@ -79,6 +76,9 @@ public class Application {
 
         LoginHandler loginHandler = new LoginHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/login", loginHandler::handle);
+
+        UserHandler userHandler = new UserHandler(mapper, exceptionHandler, userService);
+        server.createContext("/api/users", userHandler::handle);
 
         BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
         server.createContext("/api/products/books", productHandler::handle);

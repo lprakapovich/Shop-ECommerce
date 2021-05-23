@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Order extends DBObject {
     private User issuer;
-    private OrderState orderState;
+    private Status status;
     private List<OrderedItem> orderedItems;
     private LocalDate date;
     private LocalDate lastModifiedDate;

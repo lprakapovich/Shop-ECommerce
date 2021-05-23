@@ -1,10 +1,23 @@
 package model.product.book;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum Genre {
-    Fiction,
-    ScienceFiction,
+    Adventure,
+    Classics,
+    ComicBook,
+    Detective,
+    Fantasy,
+    Historical,
+    HistoricalFiction,
+    Horror,
     Romance,
-    Documentary,
-    Drama,
-    Poetry
+    ScienceFiction,
+    ShortStories,
+    Thriller,
+    Biography,
+    Cookbook
 }
