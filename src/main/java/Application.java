@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Indexes;
 import com.sun.net.httpserver.HttpServer;
 import exception.GlobalExceptionHandler;
 import handler.*;
@@ -44,7 +45,8 @@ public class Application {
         // direct serialization of POJOs to and from BSON
         // Book.class is registered explicitly because codes are not found otherwise
         CodecRegistry pojoCodecRegistry = fromProviders(
-                PojoCodecProvider.builder().register(model.product.book.Book.class, model.product.Product.class).automatic(true).build());
+                PojoCodecProvider.builder().register(model.product.book.Book.class,
+                        model.product.Product.class).automatic(true).build());
 
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
         PojoCodecProvider.builder().register(Product.class);
@@ -69,6 +71,8 @@ public class Application {
         MongoCollection<User> userCollection = database.getCollection(USERS_COLLECTION, User.class);
         MongoCollection<Book> bookCollection = database.getCollection(BOOKS_COLLECTION, Book.class);
 
+        orderCollection.createIndex(Indexes.ascending("issuer._id"));
+
         UserService userService = new UserService(userCollection);
         BookService bookService = new BookService(bookCollection, orderCollection);
 
@@ -85,11 +89,11 @@ public class Application {
         UserHandler userHandler = new UserHandler(mapper, exceptionHandler, userService);
         server.createContext("/api/users", userHandler::handle);
 
-        BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
-        server.createContext("/api/products/books", productHandler::handle);
-
         OrderHandler orderHandler = new OrderHandler(mapper, exceptionHandler, orderService);
         server.createContext("/api/orders", orderHandler::handle);
+
+        BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
+        server.createContext("/api/products/books", productHandler::handle);
 
         server.setExecutor(null);
         server.start();
