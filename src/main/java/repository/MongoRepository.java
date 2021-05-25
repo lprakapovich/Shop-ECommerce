@@ -64,7 +64,7 @@ public class MongoRepository<T extends DBObject> {
         collection.updateMany(query, Updates.set(field, value));
     }
 
-    public boolean exists(Bson query) {
+    public boolean existsByQuery(Bson query) {
         return collection.find(query).first() != null;
     }
 

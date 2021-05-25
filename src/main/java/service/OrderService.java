@@ -156,9 +156,7 @@ public class OrderService {
             order.getOrderedItems().stream()
                     .filter(i -> i.getProduct().getId().equals(productId))
                     .findFirst()
-                    .ifPresent(orderedItem -> {
-                        order.getOrderedItems().remove(orderedItem);
-                    });
+                    .ifPresent(orderedItem -> order.getOrderedItems().remove(orderedItem));
 
             if (order.getOrderedItems().isEmpty()) {
                 orderRepository.delete(order.getId());

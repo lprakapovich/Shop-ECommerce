@@ -12,8 +12,7 @@ import java.io.OutputStream;
 
 import static api.Method.OPTIONS;
 import static api.StatusCode.*;
-import static util.Constants.APPLICATION_JSON;
-import static util.Constants.CONTENT_TYPE;
+import static util.Constants.*;
 
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
@@ -23,12 +22,11 @@ public class GlobalExceptionHandler {
     public void handle(Throwable throwable, HttpExchange exchange) {
         try {
             throwable.printStackTrace();
-
             if (exchange.getRequestMethod().equals(OPTIONS.getName())) {
                 PreflightResponder.sendPreflightCheckResponse(exchange);
             } else {
                 exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add(ALLOW_ORIGIN, ALL);
                 ErrorResponse errorResponse = getErrorResponse(throwable, exchange);
                 OutputStream responseBody = exchange.getResponseBody();
                 responseBody.write(objectMapper.writeValueAsBytes(errorResponse));

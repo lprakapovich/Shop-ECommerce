@@ -44,6 +44,7 @@ public class Application {
 
         // direct serialization of POJOs to and from BSON
         // Book.class is registered explicitly because codes are not found otherwise
+
         CodecRegistry pojoCodecRegistry = fromProviders(
                 PojoCodecProvider.builder().register(model.product.book.Book.class,
                         model.product.Product.class).automatic(true).build());

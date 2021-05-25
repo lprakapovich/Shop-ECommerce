@@ -25,8 +25,8 @@ public class UserService {
         return userRepository.create(user);
     }
 
-    public User authenticate(String encryptedEmail, String encryptedPassword) {
-        User user = userRepository.findOne(and(eq(PASSWORD, encryptedPassword), eq(EMAIL, encryptedEmail)));
+    public User authenticate(String email, String password) {
+        User user = userRepository.findOne(and(eq(PASSWORD, password), eq(EMAIL, email)));
         if (user == null) {
             throw new BadRequestException(INVALID_USER_CREDENTIALS);
         }
@@ -61,7 +61,7 @@ public class UserService {
     }
 
     private void validateUser(User user) {
-        if (userRepository.exists(eq(EMAIL, user.getEmail()))) {
+        if (userRepository.existsByQuery(eq(EMAIL, user.getEmail()))) {
             throw new BadRequestException(USER_DUPLICATED_EMAIL);
         }
     }

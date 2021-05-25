@@ -75,7 +75,7 @@ public abstract class Handler {
         Headers headers = new Headers();
         headers.set(ALLOW_ORIGIN, ALL);
         headers.set(ALLOW_HEADERS, ALLOWED_HEADERS);
-        headers.set(ALLOW_METHODS, "GET, HEAD, OPTIONS, POST, PUT");
+        headers.set(ALLOW_METHODS, ALLOWED_METHODS);
         headers.set(CONTENT_TYPE, APPLICATION_JSON);
         return headers;
     }

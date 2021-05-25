@@ -24,7 +24,7 @@ public class BookService extends ProductService<Book> {
     }
 
     private void validateBook(Book book) {
-        if (productRepository.exists(and(eq(NAME, book.getName()), eq(AUTHOR, book.getAuthor())))) {
+        if (productRepository.existsByQuery(and(eq(NAME, book.getName()), eq(AUTHOR, book.getAuthor())))) {
             throw new BadRequestException(BOOK_DUPLICATED_TITLE_AND_AUTHOR);
         }
     }
