@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
+import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpServer;
 import exception.GlobalExceptionHandler;
 import handler.*;
@@ -46,8 +47,10 @@ public class Application {
         // Book.class is registered explicitly because codes are not found otherwise
 
         CodecRegistry pojoCodecRegistry = fromProviders(
-                PojoCodecProvider.builder().register(model.product.book.Book.class,
-                        model.product.Product.class).automatic(true).build());
+                PojoCodecProvider.builder().register
+                        (model.product.book.Book.class,
+                        model.product.Product.class)
+                        .automatic(true).build());
 
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
         PojoCodecProvider.builder().register(Product.class);
@@ -88,13 +91,29 @@ public class Application {
         server.createContext("/api/login", loginHandler::handle);
 
         UserHandler userHandler = new UserHandler(mapper, exceptionHandler, userService);
-        server.createContext("/api/users", userHandler::handle);
+        server.createContext("/api/users", userHandler::handle).setAuthenticator(new BasicAuthenticator("users") {
+            @Override
+            public boolean checkCredentials(String username, String password) {
+                return userService.authenticate(username, password) != null;
+            }
+        });
 
         OrderHandler orderHandler = new OrderHandler(mapper, exceptionHandler, orderService);
-        server.createContext("/api/orders", orderHandler::handle);
+        server.createContext("/api/orders", orderHandler::handle).setAuthenticator(new BasicAuthenticator("orders") {
+            @Override
+            public boolean checkCredentials(String username, String password) {
+                return userService.authenticate(username, password) != null;
+            }
+        });
 
+        // TODO make GET accessible to everyone
         BookHandler productHandler = new BookHandler(mapper, exceptionHandler, bookService);
-        server.createContext("/api/products/books", productHandler::handle);
+        server.createContext("/api/products/books", productHandler::handle).setAuthenticator(new BasicAuthenticator("products") {
+            @Override
+            public boolean checkCredentials(String username, String password) {
+                return userService.authenticate(username, password) != null;
+            }
+        });
 
         server.setExecutor(null);
         server.start();
